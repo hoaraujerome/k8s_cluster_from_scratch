@@ -1,5 +1,12 @@
 # import pytest
-# from cdktf import Testing
+from cdktf import Testing
+from main import MyStack
+from imports.aws.vpc import Vpc
+from imports.aws.subnet import Subnet
+from imports.aws.internet_gateway import InternetGateway
+from imports.aws.route_table import RouteTable
+from imports.aws.route_table_association import RouteTableAssociation
+
 
 # The tests below are example tests, you can find more information at
 # https://cdk.tf/testing
@@ -10,19 +17,51 @@ class TestMain:
     def test_my_app(self):
         assert True
 
-    # stack = TerraformStack(Testing.app(), "stack")
-    # app_abstraction = MyApplicationsAbstraction(stack, "app-abstraction")
-    # synthesized = Testing.synth(stack)
+    app = Testing.app()
+    stack = MyStack(app, "stack")
+    synthesized = Testing.synth(stack)
+    fullSynthesized = Testing.full_synth(stack)
 
-    # def test_should_contain_container(self):
-    #    assert Testing.to_have_resource(self.synthesized,
-    # Container.TF_RESOURCE_TYPE)
+    def test_should_contain_vpc(self):
+        assert Testing.to_have_resource_with_properties(
+            self.synthesized,
+            Vpc.TF_RESOURCE_TYPE, {
+                "cidr_block": "10.0.0.0/16",
+                "enable_dns_support": True,
+                "enable_dns_hostnames": True,
+            })
 
-    # def test_should_use_an_ubuntu_image(self):
-    #    assert Testing.to_have_resource_with_properties(self.synthesized,
-    # Image.TF_RESOURCE_TYPE, {
-    #        "name": "ubuntu:latest",
-    #    })
+    def test_should_contain_private_subnet(self):
+        assert Testing.to_have_resource_with_properties(
+            self.synthesized,
+            Subnet.TF_RESOURCE_TYPE, {
+                "cidr_block": "10.0.1.0/24",
+            }
+        )
 
-    # def test_check_validity(self):
-    #    assert Testing.to_be_valid_terraform(Testing.full_synth(stack))
+    def test_should_contain_internet_gateway(self):
+        assert Testing.to_have_resource(
+            self.synthesized,
+            InternetGateway.TF_RESOURCE_TYPE
+        )
+
+    def test_should_contain_route_table(self):
+        assert Testing.to_have_resource_with_properties(
+            self.synthesized,
+            RouteTable.TF_RESOURCE_TYPE, {
+                "route": [
+                    {
+                        "cidr_block": "0.0.0.0/0",
+                    },
+                ]
+            }
+        )
+
+    def test_should_contain_route_table_association(self):
+        assert Testing.to_have_resource(
+            self.synthesized,
+            RouteTableAssociation.TF_RESOURCE_TYPE
+        )
+
+    def test_to_be_valid_terraform_pass(self):
+        assert Testing.to_be_valid_terraform(self.fullSynthesized)
