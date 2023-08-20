@@ -13,14 +13,9 @@ from imports.aws.route_table_association import RouteTableAssociation
 
 
 class TestMain:
-
-    def test_my_app(self):
-        assert True
-
     app = Testing.app()
-    stack = MyStack(app, "stack")
+    stack = MyStack(app, "k8s_cluster_from_scratch")
     synthesized = Testing.synth(stack)
-    fullSynthesized = Testing.full_synth(stack)
 
     def test_should_contain_vpc(self):
         assert Testing.to_have_resource_with_properties(
@@ -62,6 +57,3 @@ class TestMain:
             self.synthesized,
             RouteTableAssociation.TF_RESOURCE_TYPE
         )
-
-    def test_to_be_valid_terraform_pass(self):
-        assert Testing.to_be_valid_terraform(self.fullSynthesized)

@@ -18,7 +18,31 @@ class MyStack(TerraformStack):
         # define resources here
         AwsProvider(self, "AWS", region="ca-central-1")
 
-        aws_vpc_main = Vpc(
+        aws_vpc_main = self._create_vpc()
+        """
+        Private subnets to create a range of IP addresses that we can allocate
+        to our instances which do not allow external access (unless through a
+        proxy or load balancer): used for both the control plane controllers
+        as well as our worker instances
+        """
+        aws_private_subnet = self._create_subnet(aws_vpc_main.id)
+        """
+        Instances need some way to connect and communicate with the internet
+        since we are on a private network. So we need to provision a gateway
+        we can use to proxy our traffic through
+        """
+        aws_internet_gateway = self._create_internet_subway(aws_vpc_main.id)
+        """
+        Set up a route table to route traffic from the private subnet to the
+        Internet Gateway
+        """
+        self._create_route_table(
+            aws_vpc_main.id,
+            aws_internet_gateway.id,
+            aws_private_subnet.id)
+
+    def _create_vpc(self):
+        return Vpc(
             self,
             "vpc",
             # https://cidr.xyz
@@ -33,59 +57,51 @@ class MyStack(TerraformStack):
             }
         )
 
-        """
-        Private subnets to create a range of IP addresses that we can allocate
-        to our instances which do not allow external access (unless through a
-        proxy or load balancer): used for both the control plane controllers
-        as well as our worker instances
-        """
-        aws_private_subnet = Subnet(
+    def _create_subnet(self, vpc_id):
+        return Subnet(
             self,
             "private-subnet",
             cidr_block="10.0.1.0/24",
             tags={
                 "Name": f"{TAG_NAME_PREFIX}private-subnet"
             },
-            vpc_id=Token.as_string(aws_vpc_main.id)
+            vpc_id=Token.as_string(vpc_id)
         )
-        """
-        Instances need some way to connect and communicate with the internet
-        since we are on a private network. So we need to provision a gateway
-        we can use to proxy our traffic through
-        """
-        aws_internet_gateway = InternetGateway(
+
+    def _create_internet_subway(self, vpc_id):
+        return InternetGateway(
             self,
             "internet-gateway",
             tags={
                 "Name": f"{TAG_NAME_PREFIX}internet-gateway"
             },
-            vpc_id=Token.as_string(aws_vpc_main.id)
+            vpc_id=Token.as_string(vpc_id)
         )
 
+    def _create_route_table(self, vpc_id, internet_gateway_id, subnet_id):
         aws_route_table = RouteTable(
             self,
             "route-table",
             route=[
                 {
                     "cidrBlock": "0.0.0.0/0",
-                    "gatewayId": Token.as_string(aws_internet_gateway.id)
+                    "gatewayId": Token.as_string(internet_gateway_id)
                 }
             ],
             tags={
                 "Name": f"{TAG_NAME_PREFIX}route-table"
             },
-            vpc_id=Token.as_string(aws_vpc_main.id)
+            vpc_id=Token.as_string(vpc_id)
         )
 
         RouteTableAssociation(
             self,
             "route-table-association",
             route_table_id=Token.as_string(aws_route_table.id),
-            subnet_id=Token.as_string(aws_private_subnet.id)
+            subnet_id=Token.as_string(subnet_id)
         )
 
 
 app = App()
 MyStack(app, "k8s_cluster_from_scratch")
-
 app.synth()

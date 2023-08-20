@@ -1,6 +1,13 @@
 # Makefile
+.PHONY: unit-tests run-integration-tests all-tests
 
-.PHONY: test
+unit-tests:
+	echo "Running unit tests"
+	pipenv run pytest ./main-unit-tests.py
 
-test:
-	pipenv run pytest ./main-test.py
+run-integration-tests:
+	echo "Running integration tests"
+	pipenv run pytest ./main-integration-tests.py
+
+all-tests: unit-tests run-integration-tests
+ 
