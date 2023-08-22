@@ -1,20 +1,20 @@
 # import pytest
 from cdktf import Testing
-from main import MyStack
+# from main import MyStack
+from networking_stack import NetworkingStack
 from imports.aws.vpc import Vpc
 from imports.aws.subnet import Subnet
 from imports.aws.internet_gateway import InternetGateway
 from imports.aws.route_table import RouteTable
 from imports.aws.route_table_association import RouteTableAssociation
+from imports.aws.security_group import SecurityGroup
 
 
 # The tests below are example tests, you can find more information at
 # https://cdk.tf/testing
-
-
-class TestMain:
+class TestApplication:
     app = Testing.app()
-    stack = MyStack(app, "k8s_cluster_from_scratch")
+    stack = NetworkingStack(app, "NetworkingStack")
     synthesized = Testing.synth(stack)
 
     def test_should_contain_vpc(self):
@@ -57,3 +57,42 @@ class TestMain:
             self.synthesized,
             RouteTableAssociation.TF_RESOURCE_TYPE
         )
+
+    def test_should_contain_security_group(self):
+        assert Testing.to_have_resource_with_properties(
+            self.synthesized,
+            SecurityGroup.TF_RESOURCE_TYPE, {
+                "ingress": [
+                    {
+                        "from_port": 0,
+                        "to_port": 0,
+                        "protocol": "-1",
+                    },
+                    {
+                        "from_port": 22,
+                        "to_port": 22,
+                        "protocol": "tcp",
+                        "cidr_blocks": [
+                            "0.0.0.0/0"
+                        ]
+                    },
+                    {
+                        "from_port": 6443,
+                        "to_port": 6443,
+                        "protocol": "tcp",
+                        "cidr_blocks": [
+                            "0.0.0.0/0"
+                        ]
+                    },
+                ],
+            }
+        )
+
+    # def test_should_contain_load_balancer(self):
+    #     assert Testing.to_have_resource_with_properties(
+    #         self.synthesized,
+    #         Lb.TF_RESOURCE_TYPE, {
+    #             "internal": True,
+    #             "load_balancer_type": "network",
+    #         }
+    #     )
