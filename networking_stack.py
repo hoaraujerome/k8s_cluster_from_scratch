@@ -29,7 +29,7 @@ class NetworkingStack(BaseStack):
         proxy or load balancer): used for both the control plane controllers
         as well as our worker instances
         """
-        aws_private_subnet = self._create_private_subnet(aws_vpc_main.id)
+        self.aws_private_subnet = self._create_private_subnet(aws_vpc_main.id)
         """
         Instances need some way to connect and communicate with the internet
         since we are on a private network. So we need to provision a gateway
@@ -43,7 +43,7 @@ class NetworkingStack(BaseStack):
         self._create_route_table(
             aws_vpc_main.id,
             aws_internet_gateway.id,
-            aws_private_subnet.id)
+            self.aws_private_subnet.id)
         """
         Allow traffic for the VPC
         """
@@ -141,3 +141,6 @@ class NetworkingStack(BaseStack):
             },
             vpc_id=Token.as_string(vpc_id)
         )
+
+    def get_private_subnet_id(self):
+        return self.aws_private_subnet.id

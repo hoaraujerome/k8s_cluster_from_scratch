@@ -1,4 +1,3 @@
-# import pytest
 from cdktf import Testing
 from networking_stack import NetworkingStack
 

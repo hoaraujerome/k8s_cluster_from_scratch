@@ -3,11 +3,11 @@
 
 unit-tests:
 	echo "Running unit tests"
-	pipenv run pytest ./main-unit-tests.py
+	find . -name "*-unit-tests.py" | xargs pipenv run pytest
 
 run-integration-tests:
 	echo "Running integration tests"
-	pipenv run pytest ./main-integration-tests.py
+	find . -name "*-integration-tests.py" | xargs pipenv run pytest
 
 all-tests: unit-tests run-integration-tests
  
