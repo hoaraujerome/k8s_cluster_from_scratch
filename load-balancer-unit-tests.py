@@ -1,6 +1,5 @@
 from cdktf import Testing
-from networking_stack import NetworkingStack
-from load_balancer_stack import LoadBalancerStack
+from load_balancer_stack import LoadBalancerStack, LoadBalancerStackConfig
 from imports.aws.lb import Lb
 
 
@@ -8,11 +7,14 @@ from imports.aws.lb import Lb
 # https://cdk.tf/testing
 class TestApplication:
     app = Testing.app()
-    networking_stack = NetworkingStack(app, "NetworkingStack")
     stackUnderTest = LoadBalancerStack(
-        app,
-        "LoadBalancerStack",
-        networking_stack)
+        app, "LoadBalancerStack",
+        LoadBalancerStackConfig(
+            tag_name_prefix="prefix-for-testing",
+            region="ca-central-1",
+            subnet_id="subnet-for-testing"
+        ),
+    )
     synthesized = Testing.synth(stackUnderTest)
 
     def test_should_contain_load_balancer(self):

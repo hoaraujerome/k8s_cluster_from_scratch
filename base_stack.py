@@ -5,7 +5,8 @@ from imports.aws.provider import AwsProvider
 
 
 class BaseStack(TerraformStack):
-    def __init__(self, scope: Construct, id: str):
+    def __init__(self, scope: Construct, id: str,
+                 region: str):
         super().__init__(scope, id)
 
-        AwsProvider(self, "AWS", region="ca-central-1")
+        AwsProvider(self, "AWS", region=region)

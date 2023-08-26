@@ -9,8 +9,6 @@ from imports.aws.route_table import RouteTable
 from imports.aws.route_table_association import RouteTableAssociation
 from imports.aws.security_group import SecurityGroup
 
-
-TAG_NAME_PREFIX = "k8s-from-scratch-"
 ALL_IP_ADDRESSES = "0.0.0.0/0"
 ALL_PORT = 0
 SSH_PORT = 22
@@ -18,9 +16,26 @@ K8S_API_PORT = 6443
 PROTOCOL_ALL = "-1"
 
 
+class NetworkingStackConfig():
+    tag_name_prefix: str
+    region: str
+
+    def __init__(self, tag_name_prefix: str, region: str):
+        self.tag_name_prefix = tag_name_prefix
+        self.region = region
+
+
 class NetworkingStack(BaseStack):
-    def __init__(self, scope: Construct, id: str):
-        super().__init__(scope, id)
+    tag_name_prefix: str
+    region: str
+    aws_private_subnet: Subnet
+
+    def __init__(self, scope: Construct, id: str,
+                 config: NetworkingStackConfig):
+        super().__init__(scope, id, config.region)
+
+        self.region = config.region
+        self.tag_name_prefix = config.tag_name_prefix
 
         aws_vpc_main = self._create_vpc()
         """
@@ -61,7 +76,7 @@ class NetworkingStack(BaseStack):
             # if they have public IP addresses
             enable_dns_hostnames=True,
             tags={
-                "Name": f"{TAG_NAME_PREFIX}vpc"
+                "Name": f"{self.tag_name_prefix}vpc"
             }
         )
 
@@ -71,9 +86,9 @@ class NetworkingStack(BaseStack):
             "private-subnet",
             cidr_block="10.0.1.0/24",
             tags={
-                "Name": f"{TAG_NAME_PREFIX}private-subnet"
+                "Name": f"{self.tag_name_prefix}private-subnet"
             },
-            vpc_id=Token.as_string(vpc_id)
+            vpc_id=vpc_id
         )
 
     def _create_internet_subway(self, vpc_id):
@@ -81,9 +96,9 @@ class NetworkingStack(BaseStack):
             self,
             "internet-gateway",
             tags={
-                "Name": f"{TAG_NAME_PREFIX}internet-gateway"
+                "Name": f"{self.tag_name_prefix}internet-gateway"
             },
-            vpc_id=Token.as_string(vpc_id)
+            vpc_id=vpc_id
         )
 
     def _create_route_table(self, vpc_id, internet_gateway_id, subnet_id):
@@ -93,11 +108,11 @@ class NetworkingStack(BaseStack):
             route=[
                 {
                     "cidrBlock": ALL_IP_ADDRESSES,
-                    "gatewayId": Token.as_string(internet_gateway_id)
+                    "gatewayId": internet_gateway_id
                 }
             ],
             tags={
-                "Name": f"{TAG_NAME_PREFIX}route-table"
+                "Name": f"{self.tag_name_prefix}route-table"
             },
             vpc_id=Token.as_string(vpc_id)
         )
@@ -105,8 +120,8 @@ class NetworkingStack(BaseStack):
         RouteTableAssociation(
             self,
             "route-table-association",
-            route_table_id=Token.as_string(aws_route_table.id),
-            subnet_id=Token.as_string(subnet_id)
+            route_table_id=aws_route_table.id,
+            subnet_id=subnet_id
         )
 
     def _create_security_group(self, vpc_id, vpc_cidr):
@@ -137,10 +152,7 @@ class NetworkingStack(BaseStack):
                 },
             ],
             tags={
-                "Name": f"{TAG_NAME_PREFIX}security-group"
+                "Name": f"{self.tag_name_prefix}security-group"
             },
-            vpc_id=Token.as_string(vpc_id)
+            vpc_id=vpc_id
         )
-
-    def get_private_subnet_id(self):
-        return self.aws_private_subnet.id

@@ -1,5 +1,5 @@
 from cdktf import Testing
-from networking_stack import NetworkingStack
+from networking_stack import NetworkingStack, NetworkingStackConfig
 from imports.aws.vpc import Vpc
 from imports.aws.subnet import Subnet
 from imports.aws.internet_gateway import InternetGateway
@@ -12,7 +12,13 @@ from imports.aws.security_group import SecurityGroup
 # https://cdk.tf/testing
 class TestApplication:
     app = Testing.app()
-    stack = NetworkingStack(app, "NetworkingStack")
+    stack = NetworkingStack(
+        app, "NetworkingStack",
+        NetworkingStackConfig(
+            tag_name_prefix="prefix-for-testing",
+            region="region-for-testing"
+        ),
+    )
     synthesized = Testing.synth(stack)
 
     def test_should_contain_vpc(self):

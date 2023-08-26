@@ -1,26 +1,37 @@
 #!/usr/bin/env python
 from constructs import Construct
-from cdktf import Token
 from base_stack import BaseStack
-from networking_stack import NetworkingStack
 from imports.aws.lb import Lb
 
-# TODO shared
-TAG_NAME_PREFIX = "k8s-from-scratch-"
+
+class LoadBalancerStackConfig():
+    tag_name_prefix: str
+    region: str
+    subnet_id: str
+
+    def __init__(self, tag_name_prefix: str, region: str, subnet_id: str):
+        self.tag_name_prefix = tag_name_prefix
+        self.region = region
+        self.subnet_id = subnet_id
 
 
 class LoadBalancerStack(BaseStack):
+    tag_name_prefix: str
+
     def __init__(self,
                  scope: Construct,
                  id: str,
-                 networking_stack: NetworkingStack):
-        super().__init__(scope, id)
+                 config: LoadBalancerStackConfig,
+                 ):
+        super().__init__(scope, id, config.region)
+
+        self.tag_name_prefix = config.tag_name_prefix
 
         """
         Access the Kubernetes API from the outside world
         """
         self._create_network_load_balancer(
-            networking_stack.get_private_subnet_id()
+            config.subnet_id
         )
 
     def _create_network_load_balancer(self, subnet_id):
@@ -29,8 +40,8 @@ class LoadBalancerStack(BaseStack):
             "network-load-balancer",
             internal=True,
             load_balancer_type="network",
-            subnets=[Token.as_string(subnet_id)],
+            subnets=[subnet_id],
             tags={
-                "Name": f"{TAG_NAME_PREFIX}load-balancer"
+                "Name": f"{self.tag_name_prefix}load-balancer"
             },
         )

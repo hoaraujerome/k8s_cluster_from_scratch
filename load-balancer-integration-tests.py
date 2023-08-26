@@ -1,18 +1,19 @@
 from cdktf import Testing
-from networking_stack import NetworkingStack
-from load_balancer_stack import LoadBalancerStack
+from load_balancer_stack import LoadBalancerStack, LoadBalancerStackConfig
 
 
-# TODO make it work
 # The tests below are example tests, you can find more information at
 # https://cdk.tf/testing
 class TestApplication:
     app = Testing.app()
-    networking_stack = NetworkingStack(app, "NetworkingStack")
     stackUnderTest = LoadBalancerStack(
-        app,
-        "LoadBalancerStack",
-        networking_stack)
+        app, "LoadBalancerStack",
+        LoadBalancerStackConfig(
+            tag_name_prefix="prefix-for-testing",
+            region="region-for-testing",
+            subnet_id="subnet-for-testing"
+        ),
+    )
     fullSynthesized = Testing.full_synth(stackUnderTest)
 
     def test_to_be_valid_terraform_pass(self):
