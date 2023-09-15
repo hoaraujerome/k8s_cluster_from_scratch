@@ -8,6 +8,9 @@ from imports.aws.internet_gateway import InternetGateway
 from imports.aws.route_table import RouteTable
 from imports.aws.route_table_association import RouteTableAssociation
 from imports.aws.security_group import SecurityGroup
+from imports.aws.nat_gateway import NatGateway
+from imports.aws.eip import Eip
+
 
 ALL_IP_ADDRESSES = "0.0.0.0/0"
 ALL_PORT = 0
@@ -38,27 +41,36 @@ class NetworkingStack(BaseStack):
         self.tag_name_prefix = config.tag_name_prefix
 
         aws_vpc_main = self._create_vpc()
+
+        aws_public_subnet = self._create_subnet(
+            "public_subnet",
+            aws_vpc_main.id,
+            "10.0.2.0/24"
+        )
+
+        self.aws_private_subnet = self._create_subnet(
+            "private_subnet",
+            aws_vpc_main.id,
+            "10.0.1.0/24"
+        )
+
         """
-        Private subnets to create a range of IP addresses that we can allocate
-        to our instances which do not allow external access (unless through a
-        proxy or load balancer): used for both the control plane controllers
-        as well as our worker instances
-        """
-        self.aws_private_subnet = self._create_private_subnet(aws_vpc_main.id)
-        """
-        Instances need some way to connect and communicate with the internet
-        since we are on a private network. So we need to provision a gateway
-        we can use to proxy our traffic through
+        Required for the public nat gateway to work
         """
         aws_internet_gateway = self._create_internet_subway(aws_vpc_main.id)
+
+        aws_eip = self._create_elastic_ip(aws_internet_gateway)
+
+        self._create_nat_gateway(aws_public_subnet.id, aws_eip.id)
+
         """
         Set up a route table to route traffic from the private subnet to the
         Internet Gateway
         """
-        self._create_route_table(
-            aws_vpc_main.id,
-            aws_internet_gateway.id,
-            self.aws_private_subnet.id)
+        # self._create_route_table(
+        #     aws_vpc_main.id,
+        #     aws_internet_gateway.id,
+        #     self.aws_private_subnet.id)
         """
         Allow traffic for the VPC
         """
@@ -80,6 +92,18 @@ class NetworkingStack(BaseStack):
             }
         )
 
+    def _create_subnet(self, subnet_id, vpc_id, cidr_block):
+        return Subnet(
+            self,
+            subnet_id,
+            cidr_block=cidr_block,
+            tags={
+                "Name": f"{self.tag_name_prefix}{subnet_id}"
+            },
+            vpc_id=vpc_id
+        )
+
+    # TODO to be deleted
     def _create_private_subnet(self, vpc_id):
         return Subnet(
             self,
@@ -89,6 +113,29 @@ class NetworkingStack(BaseStack):
                 "Name": f"{self.tag_name_prefix}private-subnet"
             },
             vpc_id=vpc_id
+        )
+
+    def _create_elastic_ip(self, internet_gateway):
+        return Eip(
+            self,
+            "eip",
+            domain="vpc",
+            tags={
+                "Name": f"{self.tag_name_prefix}eip"
+            },
+            depends_on=[internet_gateway]
+        )
+
+    def _create_nat_gateway(self, subnet_id, eip_id):
+        return NatGateway(
+            self,
+            "nat-gateway",
+            connectivity_type="public",
+            allocation_id=eip_id,
+            subnet_id=subnet_id,
+            tags={
+                "Name": f"{self.tag_name_prefix}nat-gateway"
+            }
         )
 
     def _create_internet_subway(self, vpc_id):

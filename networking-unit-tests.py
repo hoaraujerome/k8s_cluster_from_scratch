@@ -3,8 +3,8 @@ from networking_stack import NetworkingStack, NetworkingStackConfig
 from imports.aws.vpc import Vpc
 from imports.aws.subnet import Subnet
 from imports.aws.internet_gateway import InternetGateway
-from imports.aws.route_table import RouteTable
-from imports.aws.route_table_association import RouteTableAssociation
+# from imports.aws.route_table import RouteTable
+# from imports.aws.route_table_association import RouteTableAssociation
 from imports.aws.security_group import SecurityGroup
 
 
@@ -44,23 +44,23 @@ class TestApplication:
             InternetGateway.TF_RESOURCE_TYPE
         )
 
-    def test_should_contain_route_table(self):
-        assert Testing.to_have_resource_with_properties(
-            self.synthesized,
-            RouteTable.TF_RESOURCE_TYPE, {
-                "route": [
-                    {
-                        "cidr_block": "0.0.0.0/0",
-                    },
-                ]
-            }
-        )
+    # def test_should_contain_route_table(self):
+    #     assert Testing.to_have_resource_with_properties(
+    #         self.synthesized,
+    #         RouteTable.TF_RESOURCE_TYPE, {
+    #             "route": [
+    #                 {
+    #                     "cidr_block": "0.0.0.0/0",
+    #                 },
+    #             ]
+    #         }
+    #     )
 
-    def test_should_contain_route_table_association(self):
-        assert Testing.to_have_resource(
-            self.synthesized,
-            RouteTableAssociation.TF_RESOURCE_TYPE
-        )
+    # def test_should_contain_route_table_association(self):
+    #     assert Testing.to_have_resource(
+    #         self.synthesized,
+    #         RouteTableAssociation.TF_RESOURCE_TYPE
+    #     )
 
     def test_should_contain_security_group(self):
         assert Testing.to_have_resource_with_properties(
