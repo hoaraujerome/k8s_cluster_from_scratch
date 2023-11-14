@@ -10,7 +10,6 @@ class TestApplication:
         app, "NetworkingStack",
         NetworkingStackConfig(
             tag_name_prefix="prefix-for-testing",
-            region="region-for-testing",
         ),
     )
     fullSynthesized = Testing.full_synth(stack)
