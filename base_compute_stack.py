@@ -5,6 +5,9 @@ from imports.aws.data_aws_ami import DataAwsAmi
 from imports.aws.key_pair import KeyPair
 import os
 
+# https://ubuntu.com/server/docs/cloud-images/amazon-ec2
+CANONICAL_AWS_OWNER_ID = "099720109477"
+
 
 class BaseComputeStackConfig():
     tag_name_prefix: str
@@ -47,7 +50,7 @@ class BaseComputeStack(BaseStack):
                 }
             ],
             most_recent=True,
-            owners=["099720109477"]
+            owners=[CANONICAL_AWS_OWNER_ID]
         )
 
     def _create_key_pair(self, tag_name_prefix):
