@@ -39,7 +39,6 @@ class NetworkingStack(BaseStack):
                  config: NetworkingStackConfig):
         super().__init__(scope, id, config.region)
 
-        self.region = config.region
         self.aws_vpc = self._create_vpc(config.tag_name_prefix)
 
         self.aws_internet_gateway = self._create_internet_gateway(
