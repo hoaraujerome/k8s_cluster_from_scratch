@@ -3,12 +3,15 @@ from base_stack import BaseStack
 from imports.aws.provider import AwsProvider
 
 
+REGION_ID_NAME = "region-for-testing"
+
+
 # The tests below are example tests, you can find more information at
 # https://cdk.tf/testing
 class TestApplication:
     app = Testing.app()
     stackUnderTest = BaseStack(
-        app, "BaseStack", "region-for-testing",
+        app, "BaseStack", REGION_ID_NAME,
     )
     synthesized = Testing.synth(stackUnderTest)
 
@@ -16,6 +19,6 @@ class TestApplication:
         assert Testing.to_have_provider_with_properties(
             self.synthesized,
             AwsProvider.TF_RESOURCE_TYPE, {
-                "region": "region-for-testing",
+                "region": REGION_ID_NAME
             }
         )

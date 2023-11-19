@@ -18,7 +18,7 @@ class TestApplication:
         app, "BaseComputeStack",
         BaseComputeStackConfig(
             tag_name_prefix="prefix-for-testing",
-            region="ca-central-1",
+            region="region-for-testing",
         ),
     )
     synthesized = Testing.synth(stackUnderTest)
