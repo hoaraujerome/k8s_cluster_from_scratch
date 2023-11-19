@@ -5,9 +5,9 @@ from imports.aws.security_group import SecurityGroup
 from imports.aws.vpc_security_group_ingress_rule \
     import VpcSecurityGroupIngressRule
 from imports.aws.instance import Instance
+import os
 
 
-MY_IP_ADDRESS = "66.11.34.104/32"
 SSH_PORT = 22
 
 
@@ -54,6 +54,12 @@ class BastionStack(BaseStack):
             config.tag_name_prefix)
 
     def _create_security_group(self, vpc_id, tag_name_prefix):
+        my_ip_address = os.getenv("MY_IP_ADDRESS")
+
+        if not my_ip_address:
+            raise ValueError("MY_IP_ADDRESS environment "
+                             "variable is not set.")
+
         sg = SecurityGroup(
             self,
             "security-group",
@@ -70,7 +76,7 @@ class BastionStack(BaseStack):
             from_port=SSH_PORT,
             to_port=SSH_PORT,
             ip_protocol="tcp",
-            cidr_ipv4=MY_IP_ADDRESS,
+            cidr_ipv4=my_ip_address,
             security_group_id=sg.id,
             tags={
                 "Name": f"{tag_name_prefix}ssh-inbound-traffic"
