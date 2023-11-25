@@ -7,19 +7,16 @@ from imports.aws.subnet import Subnet
 from imports.aws.internet_gateway import InternetGateway
 from imports.aws.route_table import RouteTable
 from imports.aws.route_table_association import RouteTableAssociation
-# from imports.aws.security_group import SecurityGroup
 from imports.aws.nat_gateway import NatGateway
 from imports.aws.eip import Eip
 
 
 AWS_REGION = "ca-central-1"
-# ALL_PORT = 0
-# K8S_API_PORT = 6443
-# PROTOCOL_ALL = "-1"
 ALL_IP_ADDRESSES = "0.0.0.0/0"
 # https://cidr.xyz
 VPC_CIDR_BLOCK = "10.0.0.0/16"
 PUBLIC_CIDR_BLOCK = "10.0.2.0/24"
+PRIVATE_CIDR_BLOCK = "10.0.1.0/24"
 
 
 class NetworkingStackConfig():
@@ -42,35 +39,22 @@ class NetworkingStack(BaseStack):
         super().__init__(scope, id, config.region)
 
         self.region = config.region
+
         self.aws_vpc = self._create_vpc(config.tag_name_prefix)
 
-        self.aws_public_subnet = self._create_public_subnet(
+        internet_gateway = self._create_internet_gateway(
             config.tag_name_prefix
         )
 
-#        self.aws_private_subnet = self._create_subnet(
-#            "private_subnet",
-#            aws_vpc_main.id,
-#            "10.0.1.0/24"
-#        )
-#
-#
-#        aws_eip = self._create_elastic_ip(aws_internet_gateway)
-#
-#        self._create_nat_gateway(aws_public_subnet.id, aws_eip.id)
+        self.aws_public_subnet = self._create_public_subnet(
+            internet_gateway.id,
+            config.tag_name_prefix
+        )
 
-        """
-        Set up a route table to route traffic from the private subnet to the
-        Internet Gateway
-        """
-        # self._create_route_table(
-        #     aws_vpc_main.id,
-        #     aws_internet_gateway.id,
-        #     self.aws_private_subnet.id)
-        """
-        Allow traffic for the VPC
-        """
-#        self._create_security_group(aws_vpc_main.id, aws_vpc_main.cidr_block)
+        self.aws_private_subnet = self._create_private_subnet(
+            internet_gateway,
+            config.tag_name_prefix
+        )
 
     def _create_vpc(self, tag_name_prefix):
         return Vpc(
@@ -108,17 +92,18 @@ class NetworkingStack(BaseStack):
             vpc_id=self.aws_vpc.id
         )
 
-    def _associate_subnet_to_internet_gateway(self,
-                                              subnet_id,
-                                              internet_gateway_id,
-                                              tag_name_prefix):
+    def _associate_subnet_to_gateway(self,
+                                     subnet_id,
+                                     gateway_id,
+                                     gateway_type,
+                                     tag_name_prefix):
         aws_route_table = RouteTable(
             self,
-            "route-table",
+            f"{gateway_type}-route-table",
             route=[
                 {
                     "cidrBlock": ALL_IP_ADDRESSES,
-                    "gatewayId": internet_gateway_id
+                    "gatewayId": gateway_id
                 }
             ],
             tags={
@@ -129,118 +114,66 @@ class NetworkingStack(BaseStack):
 
         RouteTableAssociation(
             self,
-            "route-table-association",
+            f"{gateway_type}-route-table-association",
             route_table_id=aws_route_table.id,
             subnet_id=subnet_id
         )
 
-    def _create_public_subnet(self, tag_name_prefix):
-        internet_gateway = self._create_internet_gateway(
-            tag_name_prefix
-        )
-
+    def _create_public_subnet(self, internet_gateway_id, tag_name_prefix):
         subnet = self._create_subnet(
-            "public_subnet",
+            "public-subnet",
             PUBLIC_CIDR_BLOCK,
             tag_name_prefix
         )
 
-        self._associate_subnet_to_internet_gateway(
+        self._associate_subnet_to_gateway(
             subnet.id,
-            internet_gateway.id,
+            internet_gateway_id,
+            "internet",
             tag_name_prefix
         )
 
         return subnet
 
-    # TODO to be deleted
-    def _create_private_subnet(self, vpc_id):
-        return Subnet(
-            self,
-            "private-subnet",
-            cidr_block="10.0.1.0/24",
-            tags={
-                "Name": f"{self.tag_name_prefix}private-subnet"
-            },
-            vpc_id=vpc_id
-        )
-
-    def _create_elastic_ip(self, internet_gateway):
+    def _create_elastic_ip(self, internet_gateway, tag_name_prefix):
         return Eip(
             self,
             "eip",
             domain="vpc",
             tags={
-                "Name": f"{self.tag_name_prefix}eip"
+                "Name": f"{tag_name_prefix}eip"
             },
             depends_on=[internet_gateway]
         )
 
-    def _create_nat_gateway(self, subnet_id, eip_id):
+    def _create_nat_gateway(self, elastic_ip_id, tag_name_prefix):
         return NatGateway(
             self,
             "nat-gateway",
             connectivity_type="public",
-            allocation_id=eip_id,
-            subnet_id=subnet_id,
+            allocation_id=elastic_ip_id,
+            subnet_id=self.aws_public_subnet.id,
             tags={
-                "Name": f"{self.tag_name_prefix}nat-gateway"
+                "Name": f"{tag_name_prefix}nat-gateway"
             }
         )
 
-    # TODO to be deleted
-    def _create_route_table(self, vpc_id, internet_gateway_id, subnet_id):
-        aws_route_table = RouteTable(
-            self,
-            "route-table",
-            route=[
-                {
-                    "cidrBlock": ALL_IP_ADDRESSES,
-                    "gatewayId": internet_gateway_id
-                }
-            ],
-            tags={
-                "Name": f"{self.tag_name_prefix}route-table"
-            },
-            vpc_id=Token.as_string(vpc_id)
+    def _create_private_subnet(self, internet_gateway, tag_name_prefix):
+        eip = self._create_elastic_ip(internet_gateway, tag_name_prefix)
+
+        nat_gateway = self._create_nat_gateway(eip.id, tag_name_prefix)
+
+        subnet = self._create_subnet(
+            "private-subnet",
+            PRIVATE_CIDR_BLOCK,
+            tag_name_prefix
         )
 
-        RouteTableAssociation(
-            self,
-            "route-table-association",
-            route_table_id=aws_route_table.id,
-            subnet_id=subnet_id
+        self._associate_subnet_to_gateway(
+            subnet.id,
+            nat_gateway.id,
+            "nat",
+            tag_name_prefix
         )
 
-#    def _create_security_group(self, vpc_id, vpc_cidr):
-#        SecurityGroup(
-#            self,
-#            "security-group",
-#            ingress=[
-#                {
-#                    "description": "Allow all inbound traffic from VPC",
-#                    "fromPort": ALL_PORT,
-#                    "toPort": ALL_PORT,
-#                    "protocol": PROTOCOL_ALL,
-#                    "cidrBlocks": [vpc_cidr],
-#                },
-#                {
-#                    "description": "Allow SSH inbound traffic",
-#                    "fromPort": SSH_PORT,
-#                    "toPort": SSH_PORT,
-#                    "protocol": "tcp",
-#                    "cidrBlocks": [ALL_IP_ADDRESSES],
-#                },
-#                {
-#                    "description": "Allow K8S API inbound traffic",
-#                    "fromPort": K8S_API_PORT,
-#                    "toPort": K8S_API_PORT,
-#                    "protocol": "tcp",
-#                    "cidrBlocks": [ALL_IP_ADDRESSES],
-#                },
-#            ],
-#            tags={
-#                "Name": f"{self.tag_name_prefix}security-group"
-#            },
-#            vpc_id=vpc_id
-#        )
+        return subnet
