@@ -3,6 +3,7 @@ from constructs import Construct
 from base_stack import BaseStack
 from imports.aws.data_aws_ami import DataAwsAmi
 from imports.aws.key_pair import KeyPair
+from imports.aws.security_group import SecurityGroup
 import os
 
 # https://ubuntu.com/server/docs/cloud-images/amazon-ec2
@@ -12,15 +13,19 @@ CANONICAL_AWS_OWNER_ID = "099720109477"
 class BaseComputeStackConfig():
     tag_name_prefix: str
     region: str
+    vpc_id: str
 
-    def __init__(self, tag_name_prefix: str, region: str):
+    def __init__(self, tag_name_prefix: str, region: str, vpc_id: str):
         self.tag_name_prefix = tag_name_prefix
         self.region = region
+        self.vpc_id = vpc_id
 
 
 class BaseComputeStack(BaseStack):
     ubuntu_ami: DataAwsAmi
     key_pair: KeyPair
+    bastion_security_group_id: SecurityGroup
+    k8s_nodes_security_group_id: SecurityGroup
 
     def __init__(self,
                  scope: Construct,
@@ -30,7 +35,20 @@ class BaseComputeStack(BaseStack):
         super().__init__(scope, id, config.region)
 
         self.ubuntu_ami = self._fetch_ubuntu_ami()
+
         self.key_pair = self._create_key_pair(config.tag_name_prefix)
+
+        self.bastion_security_group_id = self._create_security_group(
+            config.vpc_id,
+            "bastion",
+            config.tag_name_prefix
+        ).id
+
+        self.k8s_nodes_security_group_id = self._create_security_group(
+            config.vpc_id,
+            "k8s-nodes",
+            config.tag_name_prefix
+        ).id
 
     def _fetch_ubuntu_ami(self):
         return DataAwsAmi(
@@ -68,4 +86,14 @@ class BaseComputeStack(BaseStack):
             "key-pair",
             key_name=f"{tag_name_prefix}ssh-key-pair",
             public_key=public_key
+        )
+
+    def _create_security_group(self, vpc_id, name, tag_name_prefix):
+        return SecurityGroup(
+            self,
+            name,
+            vpc_id=vpc_id,
+            tags={
+                "Name": f"{tag_name_prefix}{name}-security-group"
+            },
         )

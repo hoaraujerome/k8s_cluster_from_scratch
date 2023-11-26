@@ -2,9 +2,10 @@ from cdktf import Testing
 from bastion_stack import (
   BastionStack, BastionStackConfig
 )
-from imports.aws.security_group import SecurityGroup
 from imports.aws.vpc_security_group_ingress_rule \
     import VpcSecurityGroupIngressRule
+from imports.aws.vpc_security_group_egress_rule \
+    import VpcSecurityGroupEgressRule
 from imports.aws.instance import Instance
 import os
 
@@ -27,20 +28,16 @@ class TestApplication:
         BastionStackConfig(
             tag_name_prefix="tag-name-prefix-for-testing",
             region="region-for-testing",
-            vpc_id="vpc-id-for-testing",
             subnet_id=SUBNET_TEST_ID,
             ami_id=AMI_TEST_ID,
             ssh_key_name=SSH_KEY_TEST_NAME,
+            bastion_security_group_id="bastion-sg-id-for-testing",
+            k8s_nodes_security_group_id="k8s-nodes-sg-for-testing"
         )
     )
     synthesized = Testing.synth(stack)
 
-    def test_should_contain_security_group(self):
-        assert Testing.to_have_resource(
-            self.synthesized,
-            SecurityGroup.TF_RESOURCE_TYPE
-        )
-
+    def test_should_contain_security_rules(self):
         assert Testing.to_have_resource_with_properties(
             self.synthesized,
             VpcSecurityGroupIngressRule.TF_RESOURCE_TYPE, {
@@ -48,6 +45,14 @@ class TestApplication:
                 "to_port": SSH_PORT,
                 "ip_protocol": "tcp",
                 "cidr_ipv4": os.environ['MY_IP_ADDRESS']
+            })
+
+        assert Testing.to_have_resource_with_properties(
+            self.synthesized,
+            VpcSecurityGroupEgressRule.TF_RESOURCE_TYPE, {
+                "from_port": SSH_PORT,
+                "to_port": SSH_PORT,
+                "ip_protocol": "tcp",
             })
 
     def test_should_contain_instance(self):

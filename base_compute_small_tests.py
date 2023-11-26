@@ -2,6 +2,7 @@ from cdktf import Testing
 from base_compute_stack import BaseComputeStack, BaseComputeStackConfig
 from imports.aws.data_aws_ami import DataAwsAmi
 from imports.aws.key_pair import KeyPair
+from imports.aws.security_group import SecurityGroup
 
 import os
 
@@ -19,6 +20,7 @@ class TestApplication:
         BaseComputeStackConfig(
             tag_name_prefix="prefix-for-testing",
             region="region-for-testing",
+            vpc_id="vpc-id-for-testing",
         ),
     )
     synthesized = Testing.synth(stackUnderTest)
@@ -55,4 +57,10 @@ class TestApplication:
             KeyPair.TF_RESOURCE_TYPE, {
                 "public_key": public_key,
             }
+        )
+
+    def test_should_contain_security_group(self):
+        assert Testing.to_have_resource(
+            self.synthesized,
+            SecurityGroup.TF_RESOURCE_TYPE
         )

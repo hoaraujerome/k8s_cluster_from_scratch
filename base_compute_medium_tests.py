@@ -15,6 +15,7 @@ class TestApplication:
         BaseComputeStackConfig(
             tag_name_prefix="prefix-for-testing",
             region="region-for-testing",
+            vpc_id="vpc-id-for-testing",
         ),
     )
     fullSynthesized = Testing.full_synth(stack)
