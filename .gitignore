@@ -1,7 +1,8 @@
-dist/
-imports/*
-!imports/__init__.py
-.terraform
-cdktf.out
-cdktf.log
-*terraform.*.tfstate*
+# Provisioning
+provisioning/dist/
+provisioning/imports/*
+provisioning/!imports/__init__.py
+provisioning/.terraform
+provisioning/cdktf.out
+provisioning/cdktf.log
+provisioning/*terraform.*.tfstate*
