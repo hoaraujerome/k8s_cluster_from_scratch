@@ -1,17 +1,25 @@
-FROM ubuntu:22.04
+FROM base:local
 
-# non interactive needed for software-properties-common
-ENV DEBIAN_FRONTEND=noninteractive
+# ***
+# Ansible Installation
+# ***
 
-# apt list --all-versions XXX
-# software-properties-common required for add-apt-repository
-# ppa required for python 3.12 https://launchpad.net/~deadsnakes/+archive/ubuntu/ppa/
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends curl && \
-    apt-get install -y software-properties-common && \
-    add-apt-repository ppa:deadsnakes/ppa && \
-    apt-get update && \
-    apt-get install -y python3.12 && \
-    apt-get clean all
+ENV ANSIBLE_HOME_DIR=/home/ansible
 
-# TODO https://pip.pypa.io/en/stable/installation/
+RUN useradd -m ansible -d $ANSIBLE_HOME_DIR
+
+ENV PATH=$ANSIBLE_HOME_DIR/.local/bin:$PATH
+
+USER ansible
+
+WORKDIR $ANSIBLE_HOME_DIR
+
+RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
+    python3 get-pip.py --user && \
+    rm get-pip.py
+
+RUN python3 -m pip -V || exit 1
+
+RUN python3 -m pip install --user ansible==9.0.1
+
+RUN ansible-community --version || exit 1

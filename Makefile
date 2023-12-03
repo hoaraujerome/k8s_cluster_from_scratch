@@ -1,5 +1,7 @@
 # Makefile
-.PHONY: small-tests medium-tests all-tests
+.PHONY: small-tests medium-tests all-tests deploy
+
+PROVISIONING_SCRIPT = provisioning/provisioning.sh
 
 small-tests:
 	@echo "Running small tests"
@@ -10,4 +12,7 @@ medium-tests:
 	@find . -name "*_medium_tests.py" | xargs pipenv run pytest -x
 
 all-tests: small-tests medium-tests
+
+deploy:
+	@bash $(PROVISIONING_SCRIPT) deploy
 
