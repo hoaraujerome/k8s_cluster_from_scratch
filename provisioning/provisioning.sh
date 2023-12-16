@@ -1,5 +1,5 @@
 #!/bin/bash
-
+ 
 set -e
 
 print_usage() {
@@ -19,14 +19,17 @@ get_public_ip() {
 }
 
 to_cidr() {
+    # TODO 1 line
     local ip=$1
     echo "$ip/32"
 }
 
 deploy() {
-  local my_ip_address=$(to_cidr $(get_public_ip))
-  export MY_IP_ADDRESS=$my_ip_address
-  cd provisioning && cdktf deploy NetworkingStack BaseComputeStack BastionStack KubernetesNodesStack
+    # TODO 1 line
+    local my_ip_address=$(to_cidr $(get_public_ip))
+    export MY_IP_ADDRESS=$my_ip_address
+    export SSH_PUBLIC_KEY_PATH="/home/cdktf/.ssh/id_rsa.pub"
+    npx cdktf deploy NetworkingStack BaseComputeStack BastionStack KubernetesNodesStack
 }
 
 if [ -z "$1" ]; then
@@ -38,7 +41,7 @@ case "$1" in
         deploy
         ;;
     destroy)
-        # Add your destruction code here
+        # Add destruction code here
         ;;
     *)
         echo "$(basename $0) - invalid option: $1" >&2

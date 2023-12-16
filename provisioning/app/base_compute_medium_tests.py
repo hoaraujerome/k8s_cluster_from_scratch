@@ -3,7 +3,7 @@ from base_compute_stack import BaseComputeStack, BaseComputeStackConfig
 
 import os
 
-os.environ['SSH_PUBLIC_KEY_PATH'] = './README.md'
+os.environ['SSH_PUBLIC_KEY_PATH'] = './main.py'
 
 
 # The tests below are example tests, you can find more information at

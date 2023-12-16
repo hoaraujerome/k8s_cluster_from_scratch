@@ -21,6 +21,13 @@ repos:
     hooks:
       - id: run-tests
         name: Run all tests
-        entry: make all-tests
+        entry: >
+          bash -c 'cd provisioning && 
+          docker run 
+          --rm 
+          -v ./app:/home/cdktf/app 
+          -v ~/.ssh/id_rsa.pub:/home/cdktf/.ssh/id_rsa.pub:ro 
+          -v ~/.aws:/home/cdktf/.aws:ro 
+          cdktf:local all-tests'
         language: system
         pass_filenames: false

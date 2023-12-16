@@ -8,7 +8,7 @@ import os
 
 CANONICAL_AWS_OWNER_ID = "099720109477"
 
-os.environ['SSH_PUBLIC_KEY_PATH'] = './README.md'
+os.environ['SSH_PUBLIC_KEY_PATH'] = './main.py'
 
 
 # The tests below are example tests, you can find more information at
