@@ -16,3 +16,6 @@ all-tests: small-tests medium-tests
 deploy:
 	@bash $(PROVISIONING_SCRIPT) deploy 
 
+destroy:
+	@bash $(PROVISIONING_SCRIPT) destroy 
+

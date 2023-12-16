@@ -19,17 +19,22 @@ get_public_ip() {
 }
 
 to_cidr() {
-    # TODO 1 line
-    local ip=$1
-    echo "$ip/32"
+    echo "$1/32"
+}
+
+prepare_cdktf_environment() {
+    export MY_IP_ADDRESS=$(to_cidr $(get_public_ip))
+    export SSH_PUBLIC_KEY_PATH="/home/cdktf/.ssh/id_rsa.pub"
 }
 
 deploy() {
-    # TODO 1 line
-    local my_ip_address=$(to_cidr $(get_public_ip))
-    export MY_IP_ADDRESS=$my_ip_address
-    export SSH_PUBLIC_KEY_PATH="/home/cdktf/.ssh/id_rsa.pub"
+    prepare_cdktf_environment
     npx cdktf deploy NetworkingStack BaseComputeStack BastionStack KubernetesNodesStack
+}
+
+destroy() {
+    prepare_cdktf_environment
+    npx cdktf destroy NetworkingStack BaseComputeStack BastionStack KubernetesNodesStack
 }
 
 if [ -z "$1" ]; then
@@ -41,7 +46,7 @@ case "$1" in
         deploy
         ;;
     destroy)
-        # Add destruction code here
+        destroy
         ;;
     *)
         echo "$(basename $0) - invalid option: $1" >&2

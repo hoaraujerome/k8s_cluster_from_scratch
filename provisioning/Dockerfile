@@ -60,7 +60,7 @@ COPY --chown=cdktf:cdktk Pipfile Pipfile.lock cdktf.json ./
 RUN pipenv install
 
 RUN npx cdktf get
-
+ 
 COPY --chown=cdktf:cdktk Makefile provisioning.sh ./
 COPY --chown=cdktf:cdktk cdktf.out/ cdktf.out
 
