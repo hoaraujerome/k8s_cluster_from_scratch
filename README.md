@@ -22,3 +22,7 @@ If the matching private key for the private instance is loaded into ssh-agent, t
 
 
 ssh -J ubuntu@bastion-host-ip ubuntu@private-instance-ip
+
+## CDKTF
+https://developer.hashicorp.com/terraform/cdktf/create-and-deploy/environment-variables
+https://github.com/hashicorp/terraform-cdk/tree/v0.18.0
