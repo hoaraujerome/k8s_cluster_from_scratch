@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 from constructs import Construct
 from base_stack import BaseStack
 from imports.aws.data_aws_ami import DataAwsAmi
