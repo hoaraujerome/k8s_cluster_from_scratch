@@ -4,6 +4,6 @@ provisioning/imports/*
 provisioning/!imports/__init__.py
 provisioning/.terraform
 provisioning/cdktf.out/*
-!provisioning/cdktf.out/**/.terraform.lock.hcl
+!provisioning/cdktf.out/**/**/.terraform.lock.hcl
 provisioning/cdktf.log
 provisioning/*terraform.*.tfstate*
