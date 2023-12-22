@@ -12,11 +12,12 @@ if [ -z "$1" ]; then
 fi
 
 # TODO commmon code with destroy
-destroy() {
+deploy() {
     docker run \
         --rm \
         -it \
         -v ./provisioning/app:/home/cdktf/app \
+        -v ./provisioning/cdktf.out:/home/cdktf/cdktf.out \
         -v ~/.ssh/id_rsa.pub:/home/cdktf/.ssh/id_rsa.pub:ro \
         -v ~/.aws:/home/cdktf/.aws:ro \
         cdktf:local \
@@ -28,6 +29,7 @@ destroy() {
         --rm \
         -it \
         -v ./provisioning/app:/home/cdktf/app \
+        -v ./provisioning/cdktf.out:/home/cdktf/cdktf.out \
         -v ~/.ssh/id_rsa.pub:/home/cdktf/.ssh/id_rsa.pub:ro \
         -v ~/.aws:/home/cdktf/.aws:ro \
         cdktf:local \
