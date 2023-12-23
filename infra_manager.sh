@@ -29,17 +29,23 @@ run_cdktf() {
             $1
 }
 
-manage_infrastructure() {
+deploy() {
     build_cdktf_docker_image
-    run_cdktf $1
+    run_cdktf "all-tests"
+    run_cdktf "deploy"
+}
+
+destroy() {
+    build_cdktf_docker_image
+    run_cdktf "destroy"
 }
 
 case "$1" in
     deploy)
-        manage_infrastructure "deploy"
+        deploy
         ;;
     destroy)
-        manage_infrastructure "destroy"
+        destroy
         ;;
     *)
         echo "$(basename $0) - invalid option: $1" >&2
