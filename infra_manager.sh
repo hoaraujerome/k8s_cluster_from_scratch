@@ -11,6 +11,12 @@ if [ -z "$1" ]; then
     print_usage
 fi
 
+build_cdktf_docker_image() {
+    pushd provisioning
+    docker build -t cdktf:local -f Dockerfile .
+    popd
+}
+
 run_cdktf() {
     docker run \
         --rm \
@@ -23,18 +29,17 @@ run_cdktf() {
             $1
 }
 
-# TODO commmon code with destroy
-# TODO build cdk:local 
-deploy() {
-    run_cdktf "deploy"
+manage_infrastructure() {
+    build_cdktf_docker_image
+    run_cdktf $1
 }
 
 case "$1" in
     deploy)
-        deploy
+        manage_infrastructure "deploy"
         ;;
     destroy)
-        run_cdktf "destroy"
+        manage_infrastructure "destroy"
         ;;
     *)
         echo "$(basename $0) - invalid option: $1" >&2
