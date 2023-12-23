@@ -11,8 +11,7 @@ if [ -z "$1" ]; then
     print_usage
 fi
 
-# TODO commmon code with destroy
-deploy() {
+run_cdktf() {
     docker run \
         --rm \
         -it \
@@ -21,19 +20,13 @@ deploy() {
         -v ~/.ssh/id_rsa.pub:/home/cdktf/.ssh/id_rsa.pub:ro \
         -v ~/.aws:/home/cdktf/.aws:ro \
         cdktf:local \
-            deploy
+            $1
 }
 
-destroy() {
-    docker run \
-        --rm \
-        -it \
-        -v ./provisioning/app:/home/cdktf/app \
-        -v ./provisioning/cdktf.out:/home/cdktf/cdktf.out \
-        -v ~/.ssh/id_rsa.pub:/home/cdktf/.ssh/id_rsa.pub:ro \
-        -v ~/.aws:/home/cdktf/.aws:ro \
-        cdktf:local \
-            destroy
+# TODO commmon code with destroy
+# TODO build cdk:local 
+deploy() {
+    run_cdktf "deploy"
 }
 
 case "$1" in
@@ -41,7 +34,7 @@ case "$1" in
         deploy
         ;;
     destroy)
-        destroy
+        run_cdktf "destroy"
         ;;
     *)
         echo "$(basename $0) - invalid option: $1" >&2
