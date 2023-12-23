@@ -20,10 +20,6 @@ repos:
   - repo: local
     hooks:
       - id: run-tests
-        # Temporarily using small-tests for investigation.
-        # medium-tests fail after using s3 backend for TF state.
-        # Seems to be a bug from the cdktf testing library since all stacks
-        # can be deployed successfully.
         name: Run all tests
         entry: >
           bash -c 'cd provisioning && 
@@ -32,6 +28,6 @@ repos:
           -v ./app:/home/cdktf/app 
           -v ~/.ssh/id_rsa.pub:/home/cdktf/.ssh/id_rsa.pub:ro 
           -v ~/.aws:/home/cdktf/.aws:ro 
-          cdktf:local small-tests'
+          cdktf:local all-tests'
         language: system
         pass_filenames: false
