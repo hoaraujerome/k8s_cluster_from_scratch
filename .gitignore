@@ -22,6 +22,3 @@ provisioning/cdktf.out/stacks/KubernetesNodesStack/*
 provisioning/cdktf.out/stacks/NetworkingStack/*
 !provisioning/cdktf.out/stacks/NetworkingStack/.terraform.lock.hcl
 
-
-# provisioning/cdktf.out/stacks/BaseComputeStack/.terraform.lock.hclgs
-
