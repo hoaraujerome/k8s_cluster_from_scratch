@@ -36,7 +36,6 @@ USER cdktf
 
 WORKDIR $CDKTF_HOME_DIR
 
-# TODO add check specific version
 RUN terraform --version  && \
     node --version || \
     exit 1
