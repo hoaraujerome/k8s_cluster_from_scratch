@@ -1,4 +1,4 @@
-# k8s_cluster_from_scratch
+# kubernetes-the-hard-way-on-aws (WIP)
 Note: The openssh-clients package is installed by default on most Linux and macOS distributions and contains ssh-agent.
 
 1.    Run the following command to start the ssh-agent in the background. The ssh-agent stores your SSH keys in memory.
