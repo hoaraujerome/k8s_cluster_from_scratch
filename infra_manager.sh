@@ -22,7 +22,6 @@ run_cdktf() {
         --rm \
         -it \
         -v ./provisioning/app:/home/cdktf/app \
-        -v ./provisioning/cdktf.out:/home/cdktf/cdktf.out \
         -v ~/.ssh/id_rsa.pub:/home/cdktf/.ssh/id_rsa.pub:ro \
         -v ~/.aws:/home/cdktf/.aws:ro \
         cdktf:local \
