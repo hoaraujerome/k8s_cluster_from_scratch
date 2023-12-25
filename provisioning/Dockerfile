@@ -1,10 +1,13 @@
 FROM base:local
 
-ENV NODE_MAJOR=20
-
 # ***
 # cdktf & Node.js Installation
 # ***
+ENV TERRAFORM_VERSION=1.5.5-1
+ENV NODE_MAJOR=20
+ENV NODE_VERSION=20.5.1-1nodesource1
+ENV CDKTF_CLI_VERSION=0.18.0
+ENV PIP_PIPENV_VERSION=2023.11.15
 
 # make & g++ required for cdk-cli
 RUN apt-get update && \
@@ -16,14 +19,14 @@ RUN apt-get update && \
       https://apt.releases.hashicorp.com $(lsb_release -cs) main" | \
       tee /etc/apt/sources.list.d/hashicorp.list && \
     apt-get update && \
-    apt-get install -y terraform=1.5.5-1 && \
+    apt-get install -y terraform=$TERRAFORM_VERSION && \
     curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | \
       gpg --dearmor -o /usr/share/keyrings/nodesource.gpg && \
     echo "deb [signed-by=/usr/share/keyrings/nodesource.gpg] \
       https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | \
       tee /etc/apt/sources.list.d/nodesource.list && \
     apt-get update && \
-    apt-get install -y nodejs=20.5.1-1nodesource1 && \
+    apt-get install -y nodejs=$NODE_VERSION && \
     apt-get clean all
 
 ENV CDKTF_HOME_DIR=/home/cdktf
@@ -40,7 +43,7 @@ RUN terraform --version  && \
     node --version || \
     exit 1
 
-RUN npm install cdktf-cli@0.18.0
+RUN npm install cdktf-cli@$CDKTF_CLI_VERSION
 
 RUN npx cdktf --version || \
     exit 1
@@ -52,7 +55,7 @@ RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
 
 RUN python3 -m pip -V || exit 1
 
-RUN python3 -m pip install --user pipenv==2023.11.15
+RUN python3 -m pip install --user pipenv==$PIP_PIPENV_VERSION
 
 COPY --chown=cdktf:cdktk Pipfile Pipfile.lock cdktf.json ./
 
