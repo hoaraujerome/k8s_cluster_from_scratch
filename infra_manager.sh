@@ -11,7 +11,8 @@ if [ -z "$1" ]; then
     print_usage
 fi
 
-build_cdktf_docker_image() {
+build_docker_images() {
+    docker build -t base:local -f Dockerfile.base .
     pushd provisioning
     docker build -t cdktf:local -f Dockerfile .
     popd
@@ -29,13 +30,13 @@ run_cdktf() {
 }
 
 deploy() {
-    build_cdktf_docker_image
+    build_docker_images
     run_cdktf "all-tests"
     run_cdktf "deploy"
 }
 
 destroy() {
-    build_cdktf_docker_image
+    build_docker_images
     run_cdktf "destroy"
 }
 
