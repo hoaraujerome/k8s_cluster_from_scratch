@@ -3,10 +3,10 @@ FROM base:local
 # ***
 # cdktf & Node.js Installation
 # ***
-ENV TERRAFORM_VERSION=1.5.5-1
+ENV TERRAFORM_VERSION=1.6.6-1
 ENV NODE_MAJOR=20
 ENV NODE_VERSION=20.5.1-1nodesource1
-ENV CDKTF_CLI_VERSION=0.18.0
+ENV CDKTF_CLI_VERSION=0.19.2
 ENV PIP_PIPENV_VERSION=2023.11.15
 
 # make & g++ required for cdk-cli
@@ -57,14 +57,15 @@ RUN python3 -m pip -V || exit 1
 
 RUN python3 -m pip install --user pipenv==$PIP_PIPENV_VERSION
 
+#
 COPY --chown=cdktf:cdktk Pipfile Pipfile.lock cdktf.json ./
 
 RUN pipenv install
 
 RUN npx cdktf get
  
-COPY --chown=cdktf:cdktk Makefile provisioning.sh ./
 COPY --chown=cdktf:cdktk cdktf.out/ cdktf.out
+COPY --chown=cdktf:cdktk Makefile provisioning.sh ./
 
 ENTRYPOINT [ "make" ]
 
