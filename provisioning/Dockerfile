@@ -57,7 +57,6 @@ RUN python3 -m pip -V || exit 1
 
 RUN python3 -m pip install --user pipenv==$PIP_PIPENV_VERSION
 
-#
 COPY --chown=cdktf:cdktk Pipfile Pipfile.lock cdktf.json ./
 
 RUN pipenv install
