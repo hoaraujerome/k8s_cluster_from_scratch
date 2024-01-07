@@ -112,6 +112,7 @@ class BastionStack(BaseStack):
             associate_public_ip_address=True,
             vpc_security_group_ids=[sg_id],
             tags={
-                "Name": f"{tag_name_prefix}bastion"
+                "Name": f"{tag_name_prefix}bastion",
+                "Role": "bastion"
             }
         )

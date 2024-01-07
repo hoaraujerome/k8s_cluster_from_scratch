@@ -1,0 +1,9 @@
+---
+- name: Display current time
+  command: date
+  register: current_time
+
+- name: Print current time
+  debug:
+    msg: "The current time on {{ inventory_hostname }} is {{ current_time.stdout }}"
+

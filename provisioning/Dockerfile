@@ -9,9 +9,9 @@ ENV NODE_VERSION=20.5.1-1nodesource1
 ENV CDKTF_CLI_VERSION=0.19.2
 ENV PIP_PIPENV_VERSION=2023.11.15
 
-# make & g++ required for cdk-cli
+# g++ required for cdk-cli
 RUN apt-get update && \
-    apt-get install -y make g++ && \
+    apt-get install -y g++ && \
     curl -fsSL https://apt.releases.hashicorp.com/gpg | \
       gpg --dearmor | \
       tee /usr/share/keyrings/hashicorp-archive-keyring.gpg && \

@@ -3,6 +3,13 @@ FROM base:local
 ENV ANSIBLE_VERSION=9.0.1
 ENV BOTO3_VERSION=1.34.13
 
+# ssh required for ansible
+# jq used for parsing ansible aws inventory
+RUN apt-get update && \
+    apt-get install -y ssh && \
+    apt-get install -y jq && \
+    apt-get clean all
+
 # ***
 # Ansible Installation
 # ***
@@ -31,5 +38,9 @@ RUN ansible-community --version || exit 1
 # Required for AWS dynamic inventory
 RUN python3 -m pip install --user boto3==$BOTO3_VERSION
 
-COPY --chown=ansible:ansible ansible.cfg ./
+COPY --chown=ansible:ansible ansible.cfg Makefile configuration.sh ./
+
+RUN mkdir .ssh
+
+ENTRYPOINT [ "make" ]
 

@@ -89,6 +89,7 @@ class KubernetesNodesStack(BaseStack):
             associate_public_ip_address=False,
             vpc_security_group_ids=[sg_id],
             tags={
-                "Name": f"{tag_name_prefix}k8s-master-node"
+                "Name": f"{tag_name_prefix}k8s-master-node",
+                "Role": "k8s-master-node"
             }
         )
