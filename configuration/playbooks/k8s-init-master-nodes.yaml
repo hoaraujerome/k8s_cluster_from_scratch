@@ -1,8 +1,7 @@
 ---
 - name: Display current time
   hosts: k8s_master_node
-  gather_facts: no
+  gather_facts: false
 
   roles:
     - role: display_time
-
