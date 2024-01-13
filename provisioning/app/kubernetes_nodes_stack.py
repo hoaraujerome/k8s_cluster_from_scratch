@@ -3,10 +3,14 @@ from constructs import Construct
 from base_stack import BaseStack
 from imports.aws.vpc_security_group_ingress_rule \
     import VpcSecurityGroupIngressRule
+from imports.aws.vpc_security_group_egress_rule \
+    import VpcSecurityGroupEgressRule
 from imports.aws.instance import Instance
 
 
 SSH_PORT = 22
+HTTPS_PORT = 443
+ANYWHERE_IP_V4 = "0.0.0.0/0"
 
 
 class KubernetesNodesStackConfig():
@@ -71,6 +75,20 @@ class KubernetesNodesStack(BaseStack):
             tags={
                 "Name": f"{tag_name_prefix}ssh-inbound-traffic"
             },
+        )
+
+        VpcSecurityGroupEgressRule(
+            self,
+            "egress-rule",
+            description="Allow HTTPS outbound traffic",
+            from_port=HTTPS_PORT,
+            to_port=HTTPS_PORT,
+            ip_protocol="tcp",
+            cidr_ipv4=ANYWHERE_IP_V4,
+            security_group_id=k8s_nodes_security_group_id,
+            tags={
+                "Name": f"{tag_name_prefix}https-outbound-traffic"
+            }
         )
 
     def _create_master_nodes(self,
