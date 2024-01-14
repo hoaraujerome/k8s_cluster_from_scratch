@@ -1,0 +1,4 @@
+- name: Reload systemd
+  ansible.builtin.service:
+    name: systemd
+    state: reloaded

@@ -1,0 +1,64 @@
+---
+- name: Check if etcd is installed
+  ansible.builtin.command: "{{ etcd_target_path }}/etcd --version"
+  register: etcd_installed
+  ignore_errors: true
+  changed_when: false
+
+- name: Get etcd installed version
+  ansible.builtin.set_fact:
+    etcd_installed_version: "v{{ etcd_installed.stdout_lines[0].split(' ')[2] }}"
+  when: etcd_installed.rc == 0
+
+- name: Install etcd
+  when: etcd_installed.rc != 0 or etcd_installed_version != etcd_version
+  block:
+    - name: Determine host architecture
+      ansible.builtin.set_fact:
+        architecture: "{{ 'arm64' if ansible_architecture == 'aarch64' else ansible_architecture }}"
+
+    - name: Download etcd archive
+      ansible.builtin.get_url:
+        url: "{{ etcd_github_url }}/{{ etcd_version }}/etcd-{{ etcd_version }}-{{ ansible_system }}-{{ architecture }}.tar.gz"
+        dest: "{{ etcd_archive_path }}"
+        mode: "0600"
+
+    - name: Delete etcd target directory if already exists
+      ansible.builtin.file:
+        path: "{{ etcd_target_path }}"
+        state: absent
+      # TODO ensure this condition is correct
+      when: etcd_installed_version|default('') != etcd_version
+
+    - name: Ensure etcd target directory exists
+      ansible.builtin.file:
+        path: "{{ etcd_target_path }}"
+        state: directory
+        mode: "0700"
+
+    - name: Extract etcd archive
+      ansible.builtin.unarchive:
+        src: "{{ etcd_archive_path }}"
+        dest: "{{ etcd_target_path }}"
+        copy: false
+        extra_opts: "--strip-components=1"
+
+    - name: Delete etcd archive
+      ansible.builtin.file:
+        path: "{{ etcd_archive_path }}"
+        state: absent
+
+    - name: Create etcd service file
+      ansible.builtin.template:
+        src: etcd.service.j2
+        dest: /etc/systemd/system/etcd.service
+        mode: "0644"
+      become: true
+      notify: Reload systemd
+
+    # TODO ensure that the start is actually done after system reload
+    - name: Enable etcd service
+      ansible.builtin.systemd_service:
+        name: etcd
+        enabled: true
+        state: started
