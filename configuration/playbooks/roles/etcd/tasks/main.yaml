@@ -10,7 +10,7 @@
     etcd_installed_version: "v{{ etcd_installed.stdout_lines[0].split(' ')[2] }}"
   when: etcd_installed.rc == 0
 
-- name: Install etcd
+- name: Install or replace etcd
   when: etcd_installed.rc != 0 or etcd_installed_version != etcd_version
   block:
     - name: Determine host architecture
@@ -27,8 +27,7 @@
       ansible.builtin.file:
         path: "{{ etcd_target_path }}"
         state: absent
-      # TODO ensure this condition is correct
-      when: etcd_installed_version|default('') != etcd_version
+      when: etcd_installed.rc == 0 and etcd_installed_version|default('') != etcd_version
 
     - name: Ensure etcd target directory exists
       ansible.builtin.file:
@@ -48,6 +47,12 @@
         path: "{{ etcd_archive_path }}"
         state: absent
 
+    - name: Ensure etcd data directory exists
+      ansible.builtin.file:
+        path: "{{ etcd_data_path }}"
+        state: directory
+        mode: "0700"
+
     - name: Create etcd service file
       ansible.builtin.template:
         src: etcd.service.j2
@@ -56,9 +61,23 @@
       become: true
       notify: Reload systemd
 
-    # TODO ensure that the start is actually done after system reload
+    - name: Flush handlers
+      ansible.builtin.meta: flush_handlers
+
     - name: Enable etcd service
       ansible.builtin.systemd_service:
         name: etcd
         enabled: true
-        state: started
+      become: true
+
+- name: Ensure etcd is running
+  ansible.builtin.systemd_service:
+    name: etcd
+    state: started
+  become: true
+
+- name: Wait for etcd port to become available
+  ansible.builtin.wait_for:
+    host: localhost
+    port: 2379
+    timeout: 60
