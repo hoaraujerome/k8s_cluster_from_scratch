@@ -1,0 +1,122 @@
+---
+# TODO merge 2 tasks in 1 logical block
+- name: Check if control plane is installed
+  ansible.builtin.command: "{{ control_plane_target_path }}/kube-scheduler --version"
+  register: control_plane_installed
+  ignore_errors: true
+  changed_when: false
+
+- name: Get control plane installed version
+  ansible.builtin.set_fact:
+    control_plane_installed_version: "{{ control_plane_installed.stdout_lines[0].split(' ')[1] }}"
+  when: control_plane_installed.rc == 0
+    #
+    # - name: Delete existing etcd
+    #   when: etcd_installed.rc == 0 and etcd_installed_version != etcd_version
+    #   block:
+    #     - name: Ensure etcd is stopped
+    #       ansible.builtin.systemd_service:
+    #         name: etcd
+    #         state: stopped
+    #       become: true
+    #
+    #     - name: Delete etcd target directory
+    #       ansible.builtin.file:
+    #         path: "{{ etcd_target_path }}"
+    #         state: absent
+
+- name: Install control plane
+  when: control_plane_installed_version|default('') != control_plane_version
+  block:
+    - name: Download archive
+      ansible.builtin.get_url:
+        url: "{{ control_plane_url }}/{{ control_plane_version }}/kubernetes-server-{{ ansible_system | lower }}-{{ architecture }}.tar.gz"
+        dest: "{{ control_plane_archive_path }}"
+        mode: "0600"
+
+    - name: Ensure tmp directory exists
+      ansible.builtin.file:
+        path: "{{ control_plane_tmp_path }}"
+        state: directory
+        mode: "0700"
+
+    - name: Extract archive
+      ansible.builtin.unarchive:
+        src: "{{ control_plane_archive_path }}"
+        dest: "{{ control_plane_tmp_path }}"
+        remote_src: true
+        extra_opts: "--strip-components=1"
+
+    - name: Copy binaries to target directory
+      ansible.builtin.copy:
+        src: "{{ control_plane_tmp_path }}/server/bin/{{ item }}"
+        dest: "/usr/local/bin/{{ item }}"
+        remote_src: true
+        owner: root
+        group: root
+        mode: "0755"
+      with_items:
+        - kubectl
+        - kube-scheduler
+        - kube-apiserver
+      become: true
+
+    - name: Ensure PKI directory exists
+      ansible.builtin.file:
+        path: "{{ control_plane_pki_path }}"
+        state: directory
+        mode: "0700"
+      become: true
+
+    - name: Copy service account keys to target directory
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: "{{ control_plane_pki_path }}"
+        remote_src: false
+        owner: root
+        group: root
+        mode: "0600"
+      with_items:
+        - "{{ control_plane_service_account_signing_key_path }}"
+        - "{{ control_plane_service_account_key_path }}"
+      become: true
+
+          #     - name: Delete control plane archive
+          #       ansible.builtin.file:
+          #         path: "{{ control_plane_archive_path }}"
+          #         state: absent
+
+          #     - name: Ensure etcd data directory exists
+          #       ansible.builtin.file:
+          #         path: "{{ etcd_data_path }}"
+          #         state: directory
+          #         mode: "0700"
+          #
+          #     - name: Create etcd service file
+          #       ansible.builtin.template:
+          #         src: etcd.service.j2
+          #         dest: /etc/systemd/system/etcd.service
+          #         mode: "0644"
+          #       become: true
+          #       notify: Reload systemd
+          #
+          #     - name: Flush handlers
+          #       ansible.builtin.meta: flush_handlers
+          #
+          #     - name: Enable etcd service
+          #       ansible.builtin.systemd_service:
+          #         name: etcd
+          #         enabled: true
+          #       become: true
+          #
+          # - name: Ensure etcd is running
+          #   ansible.builtin.systemd_service:
+          #     name: etcd
+          #     state: started
+          #   become: true
+          #
+          # - name: Wait for etcd port to become available
+          #   ansible.builtin.wait_for:
+          #     host: localhost
+          #     port: 2379
+          #     timeout: 60

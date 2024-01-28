@@ -50,6 +50,7 @@ run_ansible() {
 	    -v ./configuration/playbooks:/home/ansible/playbooks \
 	    -v ~/.ssh/id_rsa:/home/ansible/.ssh/id_rsa:ro \
 	    -v ~/.aws:/home/ansible/.aws:ro \
+        -v ~/.k8s:/home/ansible/.k8s \
 	    ansible:local \
 		    $1
 }
