@@ -65,14 +65,12 @@
       become: true
       notify: Reload systemd
 
-    - name: Flush handlers
-      ansible.builtin.meta: flush_handlers
-
 - name: Ensure etcd is running
   ansible.builtin.systemd_service:
     name: etcd
     enabled: true
     state: started
+    daemon_reload: true
   become: true
 
 - name: Wait for etcd port to become available
