@@ -10,8 +10,22 @@
     etcd_installed_version: "v{{ etcd_installed.stdout_lines[0].split(' ')[2] }}"
   when: etcd_installed.rc == 0
 
-- name: Install or replace etcd
-  when: etcd_installed.rc != 0 or etcd_installed_version != etcd_version
+- name: Delete existing etcd
+  when: etcd_installed.rc == 0 and etcd_installed_version != etcd_version
+  block:
+    - name: Ensure etcd is stopped
+      ansible.builtin.systemd_service:
+        name: etcd
+        state: stopped
+      become: true
+
+    - name: Delete etcd target directory
+      ansible.builtin.file:
+        path: "{{ etcd_target_path }}"
+        state: absent
+
+- name: Install etcd
+  when: etcd_installed_version|default('') != etcd_version
   block:
     - name: Determine host architecture
       ansible.builtin.set_fact:
@@ -22,12 +36,6 @@
         url: "{{ etcd_github_url }}/{{ etcd_version }}/etcd-{{ etcd_version }}-{{ ansible_system }}-{{ architecture }}.tar.gz"
         dest: "{{ etcd_archive_path }}"
         mode: "0600"
-
-    - name: Delete etcd target directory if already exists
-      ansible.builtin.file:
-        path: "{{ etcd_target_path }}"
-        state: absent
-      when: etcd_installed.rc == 0 and etcd_installed_version|default('') != etcd_version
 
     - name: Ensure etcd target directory exists
       ansible.builtin.file:
