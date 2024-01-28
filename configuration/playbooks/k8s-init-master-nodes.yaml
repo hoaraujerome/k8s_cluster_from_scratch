@@ -10,5 +10,6 @@
 
   roles:
     - role: display_time
+    - role: journald
     - role: etcd
     - role: control_plane

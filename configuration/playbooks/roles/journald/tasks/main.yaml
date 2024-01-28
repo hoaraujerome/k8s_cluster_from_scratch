@@ -1,0 +1,17 @@
+---
+- name: Ensure "drop-ins" directory exists
+  ansible.builtin.file:
+    path: /etc/systemd/journald.conf.d
+    state: directory
+    mode: '0755'
+  become: true
+
+- name: Ensure storage.conf exists with correct content
+  ansible.builtin.copy:
+    dest: /etc/systemd/journald.conf.d/storage.conf
+    content: |
+      [Journal]
+      Storage=persistent
+    mode: '0644'
+  become: true
+  notify: Restart journald
