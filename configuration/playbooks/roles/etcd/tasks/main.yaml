@@ -27,10 +27,6 @@
 - name: Install etcd
   when: etcd_installed_version|default('') != etcd_version
   block:
-    - name: Determine host architecture
-      ansible.builtin.set_fact:
-        architecture: "{{ 'arm64' if ansible_architecture == 'aarch64' else ansible_architecture }}"
-
     - name: Download etcd archive
       ansible.builtin.get_url:
         url: "{{ etcd_github_url }}/{{ etcd_version }}/etcd-{{ etcd_version }}-{{ ansible_system }}-{{ architecture }}.tar.gz"

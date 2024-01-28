@@ -1,8 +1,14 @@
 ---
-- name: Display current time
+- name: Bootstrap K8S master nodes
   hosts: k8s_master_node
   gather_facts: true
+
+  tasks:
+    - name: Determine host architecture
+      ansible.builtin.set_fact:
+        architecture: "{{ 'arm64' if ansible_architecture == 'aarch64' else ansible_architecture }}"
 
   roles:
     - role: display_time
     - role: etcd
+    - role: control_plane
