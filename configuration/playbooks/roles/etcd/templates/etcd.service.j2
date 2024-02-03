@@ -5,7 +5,8 @@ After=network.target
 
 [Service]
 User=ubuntu
-ExecStart={{ etcd_target_path }}/etcd --data-dir {{ etcd_data_path }}
+EnvironmentFile={{ etcd_service_env_path }}/etcd
+ExecStart={{ etcd_target_path }}/etcd $DAEMON_OPTS
 Restart=on-failure
 
 [Install]

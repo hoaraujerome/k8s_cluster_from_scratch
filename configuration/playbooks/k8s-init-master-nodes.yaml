@@ -2,25 +2,13 @@
 - name: Set up PKI prereq
   hosts: localhost
   tasks:
-    - name: Generate service account key
-      ansible.builtin.command: openssl genrsa -out /home/ansible/.k8s/service_account.key 2048
+    - name: Generate service account keys
+      ansible.builtin.command: openssl genrsa -out "/home/ansible/.k8s/{{ item }}" 2048
       args:
-        creates: /home/ansible/.k8s/service_account.key
-    - name: Generate service account signing key
-      ansible.builtin.command: openssl genrsa -out /home/ansible/.k8s/service_account_signing.key 2048
-      args:
-        creates: /home/ansible/.k8s/service_account_signing.key
-# TODO
-# - name: Set up security prereq
-#   hosts: localhost
-#   tasks:
-#     - name: Generate keys
-#       ansible.builtin.command: openssl genrsa -out "{{ item.path }}" 2048
-#       args:
-#         creates: "{{ item.path }}"
-#       loop:
-#         - { name: 'service account key', path: '/home/ansible/.k8s/service_account.key' }
-#         - { name: 'service account signing key', path: '/home/ansible/.k8s/service_account_signing.key' }
+        creates: "/home/ansible/.k8s/{{ item }}"
+      loop:
+        - service_account.key
+        - service_account_signing.key
 
 - name: Bootstrap K8S master nodes
   hosts: k8s_master_node
@@ -28,6 +16,7 @@
   vars:
     service_account_signing_path: /home/ansible/.k8s/service_account_signing.key
     service_account_path: /home/ansible/.k8s/service_account.key
+    etcd_port: 2379
 
   tasks:
     - name: Determine host architecture
@@ -38,7 +27,10 @@
     - role: display_time
     - role: journald
     - role: etcd
+      vars:
+        etcd_client_port: "{{ etcd_port }}"
     - role: control_plane
       vars:
         control_plane_service_account_signing_key_path: "{{ service_account_signing_path }}"
         control_plane_service_account_key_path: "{{ service_account_path }}"
+        control_plane_etcd_port: "{{ etcd_port }}"

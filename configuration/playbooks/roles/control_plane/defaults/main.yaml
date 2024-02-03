@@ -12,3 +12,12 @@ control_plane_components:
   - file: "kubectl"
 
 control_plane_pki_path: "/etc/kubernetes/pki"
+control_plane_service_env_path: "/etc/default"
+
+control_plane_api_server:
+  # A CIDR notation IP range from which to assign service cluster IPs.
+  # This must not overlap with any IP ranges assigned to nodes or pods.
+  # These are not physical IP addresses that need to be provisioned in your AWS
+  # VPC, but rather virtual IP addresses that are used internally within the
+  # Kubernetes cluster
+  service_cluster_ip_range: "10.32.0.0/24"
