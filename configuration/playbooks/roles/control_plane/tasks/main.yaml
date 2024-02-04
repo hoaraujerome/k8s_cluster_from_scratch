@@ -71,15 +71,15 @@
 
     - name: Copy service account keys to target directory
       ansible.builtin.copy:
-        src: "{{ item }}"
+        src: "{{ control_plane_service_account_keys_src_path }}/{{ item }}"
         dest: "{{ control_plane_pki_path }}"
         remote_src: false
         owner: root
         group: root
         mode: "0600"
-      with_items:
-        - "{{ control_plane_service_account_signing_key_path }}"
-        - "{{ control_plane_service_account_key_path }}"
+      loop:
+        - "{{ control_plane_service_account_key_name }}"
+        - "{{ control_plane_service_account_signing_key_name }}"
       become: true
 
     - name: Ensure service env directory exists

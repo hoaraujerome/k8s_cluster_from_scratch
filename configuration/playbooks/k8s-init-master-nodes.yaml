@@ -14,8 +14,9 @@
   hosts: k8s_master_node
   gather_facts: true
   vars:
-    service_account_signing_path: /home/ansible/.k8s/service_account_signing.key
-    service_account_path: /home/ansible/.k8s/service_account.key
+    service_account_keys_src_path: /home/ansible/.k8s
+    service_account_key_name: service_account.key
+    service_account_signing_key_name: service_account_signing.key
     etcd_port: 2379
 
   tasks:
@@ -31,6 +32,7 @@
         etcd_client_port: "{{ etcd_port }}"
     - role: control_plane
       vars:
-        control_plane_service_account_signing_key_path: "{{ service_account_signing_path }}"
-        control_plane_service_account_key_path: "{{ service_account_path }}"
+        control_plane_service_account_keys_src_path: "{{ service_account_keys_src_path }}"
+        control_plane_service_account_key_name: "{{ service_account_key_name }}"
+        control_plane_service_account_signing_key_name: "{{ service_account_signing_key_name }}"
         control_plane_etcd_port: "{{ etcd_port }}"
