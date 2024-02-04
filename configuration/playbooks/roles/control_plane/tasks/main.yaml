@@ -56,10 +56,11 @@
         owner: root
         group: root
         mode: "0755"
-      with_items:
+      loop:
         - kubectl
         - kube-scheduler
         - kube-apiserver
+        - kube-controller-manager
       become: true
 
     - name: Ensure PKI directory exists
@@ -121,3 +122,17 @@
     host: localhost
     port: 6443
     timeout: 60
+
+- name: Ensure kubeconfig directory exists
+  ansible.builtin.file:
+    path: "{{ control_plane_kubeconfig_path }}"
+    state: directory
+    mode: "0700"
+  become: true
+
+- name: Create kube-controller-manager config file
+  ansible.builtin.template:
+    src: kube-controller-manager.kubeconfig.j2
+    dest: "{{ control_plane_kubeconfig_path }}/kube-controller-manager.kubeconfig"
+    mode: "0600"
+  become: true
