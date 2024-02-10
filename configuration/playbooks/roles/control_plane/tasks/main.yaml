@@ -123,16 +123,24 @@
     port: 6443
     timeout: 60
 
-- name: Ensure kubeconfig directory exists
+- name: Ensure kube directory exists
   ansible.builtin.file:
-    path: "{{ control_plane_kubeconfig_path }}"
+    path: "{{ control_plane_kube_path }}"
     state: directory
     mode: "0700"
+  become: true
+
+- name: Copy default rbac files
+  ansible.builtin.copy:
+    src: anonymous_healthz_rbac.yaml
+    dest: "{{ control_plane_kube_path }}"
+    remote_src: false
+    mode: "0600"
   become: true
 
 - name: Create kube-controller-manager config file
   ansible.builtin.template:
     src: kube-controller-manager.kubeconfig.j2
-    dest: "{{ control_plane_kubeconfig_path }}/kube-controller-manager.kubeconfig"
+    dest: "{{ control_plane_kube_path }}/kube-controller-manager.kubeconfig"
     mode: "0600"
   become: true
