@@ -1,0 +1,5 @@
+[allowlist]
+description = "Allow test RSA private key"
+paths = [
+  '''provisioning/tests/id_rsa_test'''
+]
