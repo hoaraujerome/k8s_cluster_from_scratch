@@ -1,5 +1,6 @@
 FROM ubuntu:22.04
 
+# TODO remove Python stuff after CDKTF migration
 # ***
 # Python Installation
 # ***
