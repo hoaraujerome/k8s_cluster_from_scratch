@@ -1,28 +1,88 @@
-# kubernetes-the-hard-way-on-aws (WIP)
-Note: The openssh-clients package is installed by default on most Linux and macOS distributions and contains ssh-agent.
+# Kubernetes The Hard Way On AWS
 
-1.    Run the following command to start the ssh-agent in the background. The ssh-agent stores your SSH keys in memory.
-eval $(ssh-agent)
+## Description
 
-2.    Run the following command to add the SSH key to the ssh-agent:
-ssh-add "/path/to/key.pem"
+"Kubernetes The Hard Way On AWS" is a learning project aimed at understanding each task required to bootstrap a Kubernetes cluster. Unlike the original [Kubernetes The Hard Way](https://github.com/kelseyhightower/kubernetes-the-hard-way) by Kelsey Hightower, this project uses Terraform to provision the infrastructure and Ansible to configure the Kubernetes cluster. This project is designed to take the long route to ensure a deep understanding of deploying a Kubernetes cluster on AWS.
 
-3.    Run the following command to verify that the keys are added to the ssh-agent:
-ssh-add -l
+## Badges
 
-4.    Run the following command to connect to the bastion host. In the following command, replace User and Bastion_Host_****IP_address with the correct values for your use case.
-ssh -A User@Bastion_Host_IP_Address
-
-Note: Make sure that you include the -A flag in the preceding command. If you don't add the -A flag, then ssh-agent forwarding won't work because the keys aren't added to memory. After adding the SSH keys to memory, you don't have to specify the SSH key itself using the -i flag. This is because SSH automatically attempts to use all of the SSH keys that are saved in ssh-agent.
-
-5.    After connecting to the bastion host, run the following command to connect to the private Linux instance. In the following command, replace User and Private_instance_IP_address with the correct values for your use case.
-ssh User@Private_instance_IP_address
-
-If the matching private key for the private instance is loaded into ssh-agent, then the connection succeeds.
+![Work in Progress](https://img.shields.io/badge/status-work_in_progress-yellow)
+[![Powered by LazyVim](https://img.shields.io/badge/Powered_by-LazyVim-%2307a6c3?style=flat&logo=vim&logoColor=white)](https://lazyvim.org/)
+[![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](http://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 
-ssh -J ubuntu@bastion-host-ip ubuntu@private-instance-ip
+## Visuals (TODO)
 
-## Terraform Folder Structure
-* https://docs.gruntwork.io/foundations/iac-foundations/folder-structure/
-* https://terragrunt.gruntwork.io/docs/features/keep-your-terraform-code-dry/
+![Kubernetes Cluster](images/k8s_cluster.png)
+
+## Installation
+
+### Requirements (TODO)
+
+- AWS Account
+- Terraform
+- Ansible
+- kubectl
+
+### Steps (TODO)
+
+1. **Clone the repository:**
+   ```sh
+   git clone https://github.com/yourusername/kubernetes-the-hard-way-on-aws.git
+   cd kubernetes-the-hard-way-on-aws
+   ```
+
+2. **Provision the infrastructure with Terraform:**
+   ```sh
+   terraform init
+   terraform apply
+   ```
+
+3. **Configure the Kubernetes cluster with Ansible:**
+   ```sh
+   ansible-playbook -i inventory main.yml
+   ```
+
+## Usage (TODO)
+
+After the installation, you can interact with your Kubernetes cluster using `kubectl`. Here is a simple example:
+
+```sh
+kubectl get nodes
+```
+
+Expected output:
+```
+NAME           STATUS   ROLES    AGE   VERSION
+ip-10-0-0-1    Ready    master   10m   v1.20.0
+ip-10-0-0-2    Ready    <none>   10m   v1.20.0
+```
+
+## Support
+
+If you need help, you can reach out via:
+
+- [GitHub Issues](https://github.com/hoaraujerome/kubernetes-the-hard-way-on-aws/issues)
+
+## Roadmap
+
+- Implement high availability for the Kubernetes cluster
+- Develop a hub-and-spoke network topology
+
+## Contributing
+
+This project is a personal learning endeavor, and contributions are not being accepted at this time.
+
+## Authors and Acknowledgment
+
+- **Hoarau Jerome** - [GitHub](https://github.com/hoaraujerome)
+
+Special thanks to [Kelsey Hightower](https://github.com/kelseyhightower) for the original "Kubernetes The Hard Way".
+
+## License
+
+This project is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License. For more details, see the LICENSE file or visit http://creativecommons.org/licenses/by-nc-sa/4.0/.
+
+## Project Status
+
+This project is a work in progress and is actively maintained.
