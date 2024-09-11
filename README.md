@@ -11,58 +11,48 @@
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](http://creativecommons.org/licenses/by-nc-sa/4.0/)
 
 
-## Visuals (TODO)
+## Visuals
 
-![Kubernetes Cluster](images/k8s_cluster.png)
+### Infrastructure
+
+![image](https://github.com/user-attachments/assets/5dade7ac-d416-48c1-acfe-ae3330d97e69)
+
+### K8S Cluster
+
+**WIP**
 
 ## Installation
 
-### Requirements (TODO)
+### Requirements
 
 - AWS Account
-- Terraform
-- Ansible
-- kubectl
+- AWS CLI
+- Docker
+- SSH Key Pair
+- **WIP**
 
-### Steps (TODO)
+### Steps
 
-1. **Clone the repository:**
+1. Provision the infrastructure with Terraform:
    ```sh
-   git clone https://github.com/yourusername/kubernetes-the-hard-way-on-aws.git
-   cd kubernetes-the-hard-way-on-aws
+   ./k8s_manager.sh provision
+   # Provision skipping tests: SKIP_TESTS="1" ./k8s_manager.sh provision
+   # Plan: ./k8s_manager.sh plan
    ```
 
-2. **Provision the infrastructure with Terraform:**
+2. Configure the Kubernetes cluster with Ansible: **WIP**
+
+## Usage
+
+### Infrastructure
    ```sh
-   terraform init
-   terraform apply
+   # SSH to the control plane
+   ssh -J ubuntu@<bastion_public_dns> ubuntu@<control_plane_private_dns>
    ```
 
-3. **Configure the Kubernetes cluster with Ansible:**
-   ```sh
-   ansible-playbook -i inventory main.yml
-   ```
+### K8S Cluster
 
-## Usage (TODO)
-
-After the installation, you can interact with your Kubernetes cluster using `kubectl`. Here is a simple example:
-
-```sh
-kubectl get nodes
-```
-
-Expected output:
-```
-NAME           STATUS   ROLES    AGE   VERSION
-ip-10-0-0-1    Ready    master   10m   v1.20.0
-ip-10-0-0-2    Ready    <none>   10m   v1.20.0
-```
-
-## Support
-
-If you need help, you can reach out via:
-
-- [GitHub Issues](https://github.com/hoaraujerome/kubernetes-the-hard-way-on-aws/issues)
+**WIP**
 
 ## Roadmap
 
