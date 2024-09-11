@@ -28,7 +28,7 @@
 - AWS CLI
 - Docker
 - SSH Key Pair
-- **WIP**
+- ... **WIP** ...
 
 ### Steps
 
