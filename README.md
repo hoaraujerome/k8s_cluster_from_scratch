@@ -44,7 +44,24 @@
    # Plan: ./k8s_manager.sh plan
    ```
 
+```mermaid
+graph TD;
+    subgraph "For each child module"
+        A["Linting & Formatting"] --> B["Unit test"];
+        B --> C["Contract test"];
+        C --> D["Integration test"];
+    end
+    D --> E["Linting & Formatting (root module)"];
+    E --> F["End-to-end test (root module)"];
+    F --> G["Security Scanner"];
+```
+
 3. Configure the Kubernetes cluster with Ansible: **WIP**
+
+4. Destroy the infrastructure:
+   ```sh
+   ./k8s_manager.sh destroy
+   ```
 
 ## Usage
 
