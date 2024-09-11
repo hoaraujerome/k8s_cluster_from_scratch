@@ -10,7 +10,6 @@
 [![Powered by LazyVim](https://img.shields.io/badge/Powered_by-LazyVim-%2307a6c3?style=flat&logo=vim&logoColor=white)](https://lazyvim.org/)
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](http://creativecommons.org/licenses/by-nc-sa/4.0/)
 
-
 ## Visuals
 
 ### Infrastructure
@@ -33,14 +32,19 @@
 
 ### Steps
 
-1. Provision the infrastructure with Terraform:
+1. Setup infrastructure prerequisites (S3 Terraform backend, IAM user & policy):
+   ```sh
+   ./provisioning/prereq/bootstrap_prereq.sh
+   ```
+
+2. Provision the infrastructure with Terraform:
    ```sh
    ./k8s_manager.sh provision
    # Provision skipping tests: SKIP_TESTS="1" ./k8s_manager.sh provision
    # Plan: ./k8s_manager.sh plan
    ```
 
-2. Configure the Kubernetes cluster with Ansible: **WIP**
+3. Configure the Kubernetes cluster with Ansible: **WIP**
 
 ## Usage
 
