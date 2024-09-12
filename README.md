@@ -96,4 +96,6 @@ This project is licensed under the Creative Commons Attribution-NonCommercial-Sh
 
 ## Project Status
 
-This project is a work in progress and is actively maintained.
+## Project Status
+
+This project is currently on hold until Q1 2025 as I am focusing on obtaining a certification. Active development will resume after this period.
