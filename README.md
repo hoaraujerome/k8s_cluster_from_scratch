@@ -51,9 +51,9 @@ graph TD;
         B --> C["Contract test"];
         C --> D["Integration test"];
     end
-    D --> E["Linting & Formatting (root module)"];
-    E --> F["End-to-end test (root module)"];
-    F --> G["Security Scanner"];
+    D --> E["Security Scanner"];
+    E --> F["Linting & Formatting (root module)"];
+    F --> G["End-to-end test (root module)"];
 ```
 
 3. Configure the Kubernetes cluster with Ansible: **WIP**
