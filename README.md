@@ -6,7 +6,7 @@
 
 ## Badges
 
-![Work in Progress](https://img.shields.io/badge/status-work_in_progress-yellow)
+![On hold](https://img.shields.io/badge/status-on_hold-yellow)
 [![Powered by LazyVim](https://img.shields.io/badge/Powered_by-LazyVim-%2307a6c3?style=flat&logo=vim&logoColor=white)](https://lazyvim.org/)
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](http://creativecommons.org/licenses/by-nc-sa/4.0/)
 
