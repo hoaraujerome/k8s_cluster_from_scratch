@@ -6,7 +6,7 @@
 
 ## Badges
 
-![Work in Progress](https://img.shields.io/badge/status-work_in_progress-yellow)
+![On hold](https://img.shields.io/badge/status-on_hold-yellow)
 [![Powered by LazyVim](https://img.shields.io/badge/Powered_by-LazyVim-%2307a6c3?style=flat&logo=vim&logoColor=white)](https://lazyvim.org/)
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](http://creativecommons.org/licenses/by-nc-sa/4.0/)
 
@@ -28,7 +28,7 @@
 - AWS CLI
 - Docker
 - SSH Key Pair
-- **WIP**
+- ... **WIP** ...
 
 ### Steps
 
@@ -44,7 +44,24 @@
    # Plan: ./k8s_manager.sh plan
    ```
 
+```mermaid
+graph TD;
+    subgraph "For each child module"
+        A["Linting & Formatting"] --> B["Unit test"];
+        B --> C["Contract test"];
+        C --> D["Integration test"];
+    end
+    D --> E["Security Scanner"];
+    E --> F["Linting & Formatting (root module)"];
+    F --> G["End-to-end test (root module)"];
+```
+
 3. Configure the Kubernetes cluster with Ansible: **WIP**
+
+4. Destroy the infrastructure:
+   ```sh
+   ./k8s_manager.sh destroy
+   ```
 
 ## Usage
 
@@ -79,4 +96,6 @@ This project is licensed under the Creative Commons Attribution-NonCommercial-Sh
 
 ## Project Status
 
-This project is a work in progress and is actively maintained.
+## Project Status
+
+This project is currently on hold until Q1 2025 as I am focusing on obtaining a certification. Active development will resume after this period.
