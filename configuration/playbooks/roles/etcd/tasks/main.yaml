@@ -29,7 +29,7 @@
   block:
     - name: Download etcd archive
       ansible.builtin.get_url:
-        url: "{{ etcd_github_url }}/{{ etcd_version }}/etcd-{{ etcd_version }}-{{ ansible_system }}-{{ architecture }}.tar.gz"
+        url: "{{ etcd_url }}/{{ etcd_version }}/etcd-{{ etcd_version }}-{{ ansible_system }}-{{ architecture }}.tar.gz"
         dest: "{{ etcd_archive_path }}"
         mode: "0600"
 
@@ -90,4 +90,4 @@
   ansible.builtin.wait_for:
     host: localhost
     port: "{{ etcd_client_port }}"
-    timeout: 60
+    timeout: 30

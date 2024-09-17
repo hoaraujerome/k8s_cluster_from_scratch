@@ -13,11 +13,11 @@
 - name: Bootstrap K8S control plane
   hosts: k8s_control_plane
   #  gather_facts: true
-  #  vars:
+  vars:
   #    service_account_keys_src_path: /home/ansible/.k8s
   #    service_account_key_name: service_account.key
   #    service_account_signing_key_name: service_account_signing.key
-  #    etcd_port: 2379
+    etcd_port: 2379
 
   tasks:
     - name: Determine host architecture
@@ -26,10 +26,10 @@
 
   roles:
     - role: display_time
-    #    - role: journald
-    #    - role: etcd
-    #      vars:
-    #        etcd_client_port: "{{ etcd_port }}"
+    - role: journald
+    - role: etcd
+      vars:
+        etcd_client_port: "{{ etcd_port }}"
     #    - role: control_plane
     #      vars:
     #        control_plane_service_account_keys_src_path: "{{ service_account_keys_src_path }}"

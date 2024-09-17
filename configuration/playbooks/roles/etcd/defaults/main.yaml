@@ -1,6 +1,6 @@
 ---
-etcd_github_url: "https://github.com/etcd-io/etcd/releases/download"
-etcd_version: "v3.5.11"
+etcd_url: "https://github.com/etcd-io/etcd/releases/download"
+etcd_version: "v3.5.16"
 etcd_archive_path: "/tmp/etcd.tar.gz"
 etcd_target_path: "{{ ansible_env.HOME }}/etcd"
 etcd_data_path: "{{ ansible_env.HOME }}/default.etcd"
