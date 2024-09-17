@@ -43,9 +43,13 @@ unset_terraform_vars_for_global() {
   unset TF_VAR_ssh_public_key_path
 }
 
-terraform_plan() {
+terraform_validate() {
   terraform init -backend=false
   terraform validate
+}
+
+terraform_plan() {
+  terraform_validate
   terraform init
   terraform plan
 }
@@ -66,6 +70,7 @@ plan() {
 }
 
 terraform_apply() {
+  terraform_validate
   terraform init
   terraform plan -out=tfplan
   terraform apply "tfplan"
