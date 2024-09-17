@@ -59,7 +59,6 @@ provision() {
 }
 
 build_configuration_docker_image() {
-  docker build -t base:local -f Dockerfile.base .
   pushd configuration
   docker build -t ansible:local -f Dockerfile .
   popd
