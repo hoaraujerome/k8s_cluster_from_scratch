@@ -15,7 +15,7 @@ run_scans() {
   docker run \
     --rm \
     -it \
-    -v ./provisioning:/src:ro \
+    -v "$(pwd)/provisioning:/src:ro" \
     -w /src \
     aquasec/trivy \
     fs \
