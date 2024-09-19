@@ -66,8 +66,24 @@ graph TD;
 
 ### Infrastructure
    ```sh
+   # Update ~/.ssh/config to simplify ssh command
+   [...]
+Host k8s-hard-way-bastion
+  HostName <bastion_public_dns>
+  User ubuntu
+  IdentityFile ~/.ssh/id_rsa_k8s_the_hard_way
+  StrictHostKeyChecking no
+
+Host k8s-hard-way-control-plane
+  HostName <control_plane_private_dns>
+  User ubuntu
+  ProxyJump k8s-hard-way-bastion
+  IdentityFile ~/.ssh/id_rsa_k8s_the_hard_way
+  StrictHostKeyChecking no
+
+   [...]
    # SSH to the control plane
-   ssh -J ubuntu@<bastion_public_dns> ubuntu@<control_plane_private_dns>
+   ssh k8s-hard-way-control-plane
    ```
 
 ### K8S Cluster
