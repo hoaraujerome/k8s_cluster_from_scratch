@@ -35,8 +35,8 @@ run_terraform() {
     --rm \
     -it \
     -v ~/.aws:/home/terraform/.aws:ro \
-    -v ~/.ssh/id_rsa.pub:/home/terraform/.ssh/id_rsa.pub:ro \
-    -v ~/.ssh/id_rsa:/home/terraform/.ssh/id_rsa:ro \
+    -v ~/.ssh/id_rsa_k8s_the_hard_way.pub:/home/terraform/.ssh/id_rsa.pub:ro \
+    -v ~/.ssh/id_rsa_k8s_the_hard_way:/home/terraform/.ssh/id_rsa:ro \
     -v ./provisioning/main-account:/home/terraform/code/main-account \
     -v ./provisioning/modules:/home/terraform/code/modules \
     -v ./provisioning/tests:/home/terraform/code/tests \
@@ -70,7 +70,7 @@ run_ansible() {
     -it \
     -v ./configuration/inventory:/home/ansible/inventory \
     -v ./configuration/playbooks:/home/ansible/playbooks \
-    -v ~/.ssh/id_rsa:/home/ansible/.ssh/id_rsa:ro \
+    -v ~/.ssh/id_rsa_k8s_the_hard_way:/home/ansible/.ssh/id_rsa:ro \
     -v ~/.aws:/home/ansible/.aws:ro \
     -v ~/.k8s:/home/ansible/.k8s \
     ansible:local \

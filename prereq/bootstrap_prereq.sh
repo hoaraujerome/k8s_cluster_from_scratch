@@ -6,6 +6,11 @@ AWS_PROFILE="k8s_the_hard_way_prereq"
 AWS_CLI_TAG="2.16.5"
 CURRENT_SCRIPT_DIRECTORY="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 USER_POLICY_FILENAME="user_policy.json"
+KEY_FILE="$HOME/.ssh/id_rsa_k8s_the_hard_way"
+
+create_pki() {
+  ssh-keygen -t rsa -b 2048 -f "$KEY_FILE" -N ""
+}
 
 run_aws_command() {
   docker run \
@@ -35,6 +40,7 @@ create_user() {
 }
 
 main() {
+  create_pki
   create_terraform_backend
   create_user
 }
