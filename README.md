@@ -6,7 +6,7 @@
 
 ## Badges
 
-![On hold](https://img.shields.io/badge/status-on_hold-yellow)
+![Work In Progress](https://img.shields.io/badge/status-on_hold-yellow)
 [![Powered by LazyVim](https://img.shields.io/badge/Powered_by-LazyVim-%2307a6c3?style=flat&logo=vim&logoColor=white)](https://lazyvim.org/)
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](http://creativecommons.org/licenses/by-nc-sa/4.0/)
 
@@ -27,12 +27,11 @@
 - AWS Account
 - AWS CLI
 - Docker
-- SSH Key Pair
 - ... **WIP** ...
 
 ### Steps
 
-1. Setup infrastructure prerequisites (S3 Terraform backend, IAM user & policy):
+1. Setup infrastructure prerequisites (S3 Terraform backend, IAM user & policy, PKI, ...):
    ```sh
    ./provisioning/prereq/bootstrap_prereq.sh
    ```
@@ -96,6 +95,4 @@ This project is licensed under the Creative Commons Attribution-NonCommercial-Sh
 
 ## Project Status
 
-## Project Status
-
-This project is currently on hold until Q1 2025 as I am focusing on obtaining a certification. Active development will resume after this period.
+This project is a work in progress and is actively maintained.
