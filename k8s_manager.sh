@@ -37,9 +37,9 @@ run_terraform() {
     -v ~/.aws:/home/terraform/.aws:ro \
     -v ~/.ssh/id_rsa.pub:/home/terraform/.ssh/id_rsa.pub:ro \
     -v ~/.ssh/id_rsa:/home/terraform/.ssh/id_rsa:ro \
-    -v ./provisioning/main-account:/home/terraform/code/main-account \
-    -v ./provisioning/modules:/home/terraform/code/modules \
-    -v ./provisioning/tests:/home/terraform/code/tests \
+    -v "$(pwd)/provisioning/main-account:/home/terraform/code/main-account" \
+    -v "$(pwd)/provisioning/modules:/home/terraform/code/modules" \
+    -v "$(pwd)/provisioning/tests:/home/terraform/code/tests" \
     -e AWS_PROFILE=k8s_the_hard_way \
     -e SKIP_TESTS=${SKIP_TESTS} \
     terraform:local \
