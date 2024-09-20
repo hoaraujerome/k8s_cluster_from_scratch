@@ -1,0 +1,92 @@
+---
+- name: Install kube-apiserver binary
+  block:
+    #     - name: Capture etcd installed version
+    #       ansible.builtin.command: "{{ etcd_target_path }}/etcd --version"
+    #       register: etcd_installed
+    #       ignore_errors: true
+    #       changed_when: false
+
+    #    - name: Set etcd installed version fact
+    #      ansible.builtin.set_fact:
+    #        etcd_installed_version: "v{{ etcd_installed.stdout_lines[0].split(' ')[2] }}"
+    #      when: etcd_installed.rc == 0
+
+    #    - name: Stop and remove existing etcd if version mismatch
+    #      when: etcd_installed.rc == 0 and etcd_installed_version != etcd_version
+    #      block:
+    #        - name: Ensure etcd is stopped
+    #          ansible.builtin.systemd_service:
+    #            name: etcd
+    #            state: stopped
+    #          become: true
+    #
+    #        - name: Remove etcd target directory
+    #          ansible.builtin.file:
+    #            path: "{{ etcd_target_path }}"
+    #            state: absent
+
+    - name: Install kube-apiserver binary if not installed or version mismatch
+      #  when: etcd_installed_version|default('') != etcd_version
+      block:
+        - name: Download kube-apiserver binary
+          ansible.builtin.get_url:
+            url: "{{ kube_apiserver_url }}/{{ kube_apiserver_version }}/bin/{{ ansible_system | lower }}/{{ architecture }}/kube-apiserver"
+            dest: "{{ kube_apiserver_target_path }}"
+            owner: root
+            group: root
+            mode: "0755"
+          become: true
+
+        #         - name: Ensure etcd target directory exists
+        #           ansible.builtin.file:
+        #             path: "{{ etcd_target_path }}"
+        #             state: directory
+        #             mode: "0700"
+        #
+        #         - name: Extract etcd archive
+        #           ansible.builtin.unarchive:
+        #             src: "{{ etcd_archive_path }}"
+        #             dest: "{{ etcd_target_path }}"
+        #             copy: false
+        #             extra_opts: "--strip-components=1"
+        #           notify: Restart etcd service
+        #
+        #         - name: Delete etcd archive
+        #           ansible.builtin.file:
+        #             path: "{{ etcd_archive_path }}"
+        #             state: absent
+        #
+        # - name: Install and configure etcd service
+        #   block:
+        #     - name: Ensure service env directory exists
+        #       ansible.builtin.file:
+        #         path: "{{ etcd_service_env_path }}"
+        #         state: directory
+        #         mode: "0755"
+        #       become: true
+        #
+        #     - name: Create service environment file
+        #       ansible.builtin.template:
+        #         src: etcd.env.j2
+        #         dest: "{{ etcd_service_env_path }}/etcd"
+        #         mode: "0644"
+        #       become: true
+        #       notify: Restart etcd service
+        #
+        #     - name: Create systemd service file for etcd
+        #       ansible.builtin.template:
+        #         src: etcd.service.j2
+        #         dest: /lib/systemd/system/etcd.service
+        #         mode: "0644"
+        #       become: true
+        #       notify: Restart etcd service
+        #
+        # - name: Trigger handler immediately after service configuration
+        #   ansible.builtin.meta: flush_handlers
+        #
+        # - name: Wait for etcd client port to become available
+        #   ansible.builtin.wait_for:
+        #     host: localhost
+        #     port: "{{ etcd_client_port }}"
+        #     timeout: 30

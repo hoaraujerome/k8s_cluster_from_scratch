@@ -30,6 +30,7 @@
     - role: etcd
       vars:
         etcd_client_port: "{{ etcd_port }}"
+    - role: kube_apiserver
     #    - role: control_plane
     #      vars:
     #        control_plane_service_account_keys_src_path: "{{ service_account_keys_src_path }}"
