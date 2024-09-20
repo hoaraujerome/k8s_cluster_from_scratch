@@ -38,55 +38,36 @@
             mode: "0755"
           become: true
 
-        #         - name: Ensure etcd target directory exists
-        #           ansible.builtin.file:
-        #             path: "{{ etcd_target_path }}"
-        #             state: directory
-        #             mode: "0700"
-        #
-        #         - name: Extract etcd archive
-        #           ansible.builtin.unarchive:
-        #             src: "{{ etcd_archive_path }}"
-        #             dest: "{{ etcd_target_path }}"
-        #             copy: false
-        #             extra_opts: "--strip-components=1"
-        #           notify: Restart etcd service
-        #
-        #         - name: Delete etcd archive
-        #           ansible.builtin.file:
-        #             path: "{{ etcd_archive_path }}"
-        #             state: absent
-        #
-        # - name: Install and configure etcd service
-        #   block:
-        #     - name: Ensure service env directory exists
-        #       ansible.builtin.file:
-        #         path: "{{ etcd_service_env_path }}"
-        #         state: directory
-        #         mode: "0755"
-        #       become: true
-        #
-        #     - name: Create service environment file
-        #       ansible.builtin.template:
-        #         src: etcd.env.j2
-        #         dest: "{{ etcd_service_env_path }}/etcd"
-        #         mode: "0644"
-        #       become: true
-        #       notify: Restart etcd service
-        #
-        #     - name: Create systemd service file for etcd
-        #       ansible.builtin.template:
-        #         src: etcd.service.j2
-        #         dest: /lib/systemd/system/etcd.service
-        #         mode: "0644"
-        #       become: true
-        #       notify: Restart etcd service
-        #
-        # - name: Trigger handler immediately after service configuration
-        #   ansible.builtin.meta: flush_handlers
-        #
-        # - name: Wait for etcd client port to become available
-        #   ansible.builtin.wait_for:
-        #     host: localhost
-        #     port: "{{ etcd_client_port }}"
-        #     timeout: 30
+- name: Install and configure kube-apiserver service
+  block:
+    - name: Ensure service env directory exists
+      ansible.builtin.file:
+        path: "{{ kube_apiserver_service_env_path }}"
+        state: directory
+        mode: "0755"
+      become: true
+
+    - name: Create service environment file
+      ansible.builtin.template:
+        src: kube-apiserver.env.j2
+        dest: "{{ kube_apiserver_service_env_path }}/kube-apiserver"
+        mode: "0644"
+      become: true
+      notify: Restart kube-apiserver service
+
+    - name: Create systemd service file
+      ansible.builtin.template:
+        src: kube-apiserver.service.j2
+        dest: /lib/systemd/system/kube-apiserver.service
+        mode: "0644"
+      become: true
+      notify: Restart kube-apiserver service
+
+- name: Trigger handler immediately after service configuration
+  ansible.builtin.meta: flush_handlers
+
+- name: Wait for kube-apiserver port to become available
+  ansible.builtin.wait_for:
+    host: localhost
+    port: 6443
+    timeout: 30
