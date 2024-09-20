@@ -53,6 +53,7 @@
             dest: "{{ etcd_target_path }}"
             copy: false
             extra_opts: "--strip-components=1"
+          notify: Restart etcd service
 
         - name: Delete etcd archive
           ansible.builtin.file:
