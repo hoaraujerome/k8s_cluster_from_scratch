@@ -72,7 +72,7 @@ run_ansible() {
     -v "$(pwd)/configuration/playbooks:/home/ansible/playbooks" \
     -v ~/.ssh/id_rsa_k8s_the_hard_way:/home/ansible/.ssh/id_rsa:ro \
     -v ~/.aws:/home/ansible/.aws:ro \
-    -v ~/.k8s:/home/ansible/.k8s \
+    -v ~/.k8s_the_hard_way:/home/ansible/.k8s \
     -e AWS_PROFILE=k8s_the_hard_way \
     ansible:local \
     $1
