@@ -1,14 +1,14 @@
 ---
-- name: Set up PKI prereq
-  hosts: localhost
-  tasks:
-    - name: Generate service account keys
-      ansible.builtin.command: openssl genrsa -out "/home/ansible/.k8s/{{ item }}" 2048
-      args:
-        creates: "/home/ansible/.k8s/{{ item }}"
-      loop:
-        - service_account.key
-        - service_account_signing.key
+# - name: Set up PKI prereq
+#   hosts: localhost
+#   tasks:
+#     - name: Generate service account keys
+#       ansible.builtin.command: openssl genrsa -out "/home/ansible/.k8s/{{ item }}" 2048
+#       args:
+#         creates: "/home/ansible/.k8s/{{ item }}"
+#       loop:
+#         - service_account.key
+#         - service_account_signing.key
 
 - name: Bootstrap K8S control plane
   hosts: k8s_control_plane

@@ -7,9 +7,26 @@ AWS_CLI_TAG="2.16.5"
 CURRENT_SCRIPT_DIRECTORY="$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd)"
 USER_POLICY_FILENAME="user_policy.json"
 KEY_FILE="$HOME/.ssh/id_rsa_k8s_the_hard_way"
+K8S_CRYPTO_ASSETS_DIRECTORY="$HOME/.k8s_the_hard_way"
 
-create_pki() {
+setup_ssh_key() {
   ssh-keygen -t rsa -b 2048 -f "$KEY_FILE" -N ""
+}
+
+setup_root_ca() {
+  mkdir -p ${K8S_CRYPTO_ASSETS_DIRECTORY}
+
+  openssl genrsa -out ${K8S_CRYPTO_ASSETS_DIRECTORY}/ca.key 4096
+
+  openssl req -x509 -new -sha512 -noenc \
+    -key ${K8S_CRYPTO_ASSETS_DIRECTORY}/ca.key -days 365 \
+    -config ${CURRENT_SCRIPT_DIRECTORY}/ca.conf \
+    -out ${K8S_CRYPTO_ASSETS_DIRECTORY}/ca.crt
+}
+
+setup_crypto_assets() {
+  setup_ssh_key
+  setup_root_ca
 }
 
 run_aws_command() {
@@ -40,7 +57,7 @@ create_user() {
 }
 
 main() {
-  create_pki
+  setup_crypto_assets
   create_terraform_backend
   create_user
 }
