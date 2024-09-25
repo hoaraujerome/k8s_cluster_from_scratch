@@ -10,6 +10,8 @@
 #         - service_account.key
 #         - service_account_signing.key
 
+# TODO
+# Pass service-account-key-file, service-account-signing-key-file and set service-account-issuer
 - name: Bootstrap K8S control plane
   hosts: k8s_control_plane
   #  gather_facts: true

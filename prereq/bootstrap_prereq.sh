@@ -9,6 +9,10 @@ USER_POLICY_FILENAME="user_policy.json"
 KEY_FILE="$HOME/.ssh/id_rsa_k8s_the_hard_way"
 K8S_CRYPTO_ASSETS_DIRECTORY="$HOME/.k8s_the_hard_way"
 
+certs=(
+  "service-accounts"
+)
+
 setup_ssh_key() {
   ssh-keygen -t rsa -b 2048 -f "$KEY_FILE" -N ""
 }
@@ -16,17 +20,38 @@ setup_ssh_key() {
 setup_root_ca() {
   mkdir -p ${K8S_CRYPTO_ASSETS_DIRECTORY}
 
-  openssl genrsa -out ${K8S_CRYPTO_ASSETS_DIRECTORY}/ca.key 4096
-
+  pushd "${K8S_CRYPTO_ASSETS_DIRECTORY}"
+  openssl genrsa -out ca.key 4096
   openssl req -x509 -new -sha512 -noenc \
-    -key ${K8S_CRYPTO_ASSETS_DIRECTORY}/ca.key -days 365 \
+    -key ca.key -days 365 \
     -config ${CURRENT_SCRIPT_DIRECTORY}/ca.conf \
-    -out ${K8S_CRYPTO_ASSETS_DIRECTORY}/ca.crt
+    -out ca.crt
+  popd
+}
+
+setup_k8s_certs() {
+  pushd "${K8S_CRYPTO_ASSETS_DIRECTORY}"
+  for i in ${certs[*]}; do
+    openssl genrsa -out "${i}.key" 4096
+
+    openssl req -new -key "${i}.key" -sha256 \
+      -config "${CURRENT_SCRIPT_DIRECTORY}/ca.conf" -section ${i} \
+      -out "${i}.csr"
+
+    openssl x509 -req -days 365 -in "${i}.csr" \
+      -copy_extensions copyall \
+      -sha256 -CA "ca.crt" \
+      -CAkey "ca.key" \
+      -CAcreateserial \
+      -out "${i}.crt"
+  done
+  popd
 }
 
 setup_crypto_assets() {
   setup_ssh_key
   setup_root_ca
+  setup_k8s_certs
 }
 
 run_aws_command() {
