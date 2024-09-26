@@ -10,15 +10,13 @@
 #         - service_account.key
 #         - service_account_signing.key
 
-# TODO
-# Pass service-account-key-file, service-account-signing-key-file and set service-account-issuer
 - name: Bootstrap K8S control plane
   hosts: k8s_control_plane
-  #  gather_facts: true
+  gather_facts: true
   vars:
-  #    service_account_keys_src_path: /home/ansible/.k8s
-  #    service_account_key_name: service_account.key
-  #    service_account_signing_key_name: service_account_signing.key
+    k8s_pki_path: /home/ansible/.k8s
+    service_account_key_file: service-accounts.crt
+    service_account_signing_key_file: service-accounts.key
     etcd_port: 2379
 
   tasks:
@@ -32,9 +30,12 @@
     - role: etcd
       vars:
         etcd_client_port: "{{ etcd_port }}"
-    # - role: kube_apiserver
-    #   vars:
-    #     kube_apiserver_etcd_port: "{{ etcd_port }}"
+    - role: kube_apiserver
+      vars:
+        kube_apiserver_etcd_port: "{{ etcd_port }}"
+        kube_apiserver_pki_src_path: "{{ k8s_pki_path }}"
+        kube_apiserver_service_account_key_file: "{{ service_account_key_file }}"
+        kube_apiserver_service_account_signing_key_file: "{{ service_account_signing_key_file }}"
     #    - role: control_plane
     #      vars:
     #        control_plane_service_account_keys_src_path: "{{ service_account_keys_src_path }}"

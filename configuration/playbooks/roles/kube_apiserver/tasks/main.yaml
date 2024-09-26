@@ -38,6 +38,29 @@
             mode: "0755"
           become: true
 
+- name: Setup PKI
+  block:
+    - name: Ensure PKI directory exists
+      ansible.builtin.file:
+        path: "{{ kube_apiserver_pki_path }}"
+        state: directory
+        mode: "0700"
+      become: true
+
+    - name: Copy certs and keys to target directory
+      ansible.builtin.copy:
+        src: "{{ kube_apiserver_pki_src_path }}/{{ item }}"
+        dest: "{{ kube_apiserver_pki_path }}"
+        remote_src: false
+        owner: root
+        group: root
+        mode: "0600"
+      loop:
+        - "{{ kube_apiserver_service_account_key_file }}"
+        - "{{ kube_apiserver_service_account_signing_key_file }}"
+      become: true
+      notify: Restart kube-apiserver service
+
 - name: Install and configure kube-apiserver service
   block:
     - name: Ensure service env directory exists
