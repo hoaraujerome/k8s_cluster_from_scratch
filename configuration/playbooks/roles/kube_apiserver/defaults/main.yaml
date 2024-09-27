@@ -4,6 +4,20 @@ kube_apiserver_version: "v1.31.1"
 kube_apiserver_target_path: "/usr/local/bin"
 kube_apiserver_pki_path: "/var/lib/kubernetes"
 kube_apiserver_service_env_path: "/etc/default"
-kube_apiserver_service_cluster_ip_range: "10.43.0.0/16"
+
+# ***
+# kube-apiserver options
+# ***
+# Do not change service_cluster_ip_range after the cluster has already been brought up once
+# https://github.com/k3s-io/k3s/issues/3489
+kube_apiserver_service_cluster_ip_range: "10.32.0.0/24"
 kube_apiserver_service_account_issuer: "https://kubernetes.default.svc"
 kube_apiserver_auth_modes: "RBAC"
+kube_apiserver_audit_log:
+  maxage: 30
+  maxbackup: 3
+  maxsize: 100
+kube_apiserver_audit_log_path: "/var/log/k8s_audit.log"
+kube_apiserver_bind_address: "0.0.0.0"
+# If not set, default to the internal IP address of the node
+# kube_apiserver_external_hostname: X.X.X.X

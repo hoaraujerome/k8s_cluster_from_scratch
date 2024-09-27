@@ -7,6 +7,7 @@ After=network.target
 EnvironmentFile={{ kube_apiserver_service_env_path }}/kube-apiserver
 ExecStart={{ kube_apiserver_target_path }}/kube-apiserver $DAEMON_OPTS
 Restart=on-failure
+RestartSec=5
 
 [Install]
 WantedBy=multi-user.target
