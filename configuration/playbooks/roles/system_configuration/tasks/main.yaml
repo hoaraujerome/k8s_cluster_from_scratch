@@ -1,0 +1,28 @@
+---
+- name: Configure systemd journald
+  block:
+    - name: Ensure "drop-ins" directory exists
+      ansible.builtin.file:
+        path: /etc/systemd/journald.conf.d
+        state: directory
+        mode: '0755'
+      become: true
+
+    - name: Ensure storage.conf exists with correct content
+      ansible.builtin.copy:
+        dest: /etc/systemd/journald.conf.d/storage.conf
+        content: |
+          [Journal]
+          Storage=persistent
+        mode: '0644'
+      become: true
+      notify: Restart journald
+
+- name: Update hosts file
+  block:
+    - name: Create server aliases
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        state: present
+        line: "{{ ansible_default_ipv4.address | default(ansible_all_ipv4_addresses[0]) }} server server.kubernetes.local"
+      become: true

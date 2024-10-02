@@ -31,7 +31,7 @@
       block:
         - name: Download kube-apiserver binary
           ansible.builtin.get_url:
-            url: "{{ kube_apiserver_url }}/{{ kube_apiserver_version }}/bin/{{ ansible_system | lower }}/{{ architecture }}/kube-apiserver"
+            url: "{{ control_plane_binaries_url }}/kube-apiserver"
             dest: "{{ kube_apiserver_target_path }}"
             owner: root
             group: root

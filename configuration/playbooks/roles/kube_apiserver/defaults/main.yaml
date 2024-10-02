@@ -1,6 +1,4 @@
 ---
-kube_apiserver_url: "https://dl.k8s.io"
-kube_apiserver_version: "v1.31.1"
 kube_apiserver_target_path: "/usr/local/bin"
 kube_apiserver_pki_path: "/var/lib/kubernetes"
 kube_apiserver_service_env_path: "/etc/default"

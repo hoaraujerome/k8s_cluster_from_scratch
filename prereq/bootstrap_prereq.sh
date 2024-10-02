@@ -12,6 +12,7 @@ K8S_CRYPTO_ASSETS_DIRECTORY="$HOME/.k8s_the_hard_way"
 certs=(
   "service-accounts"
   "kube-api-server"
+  "kube-controller-manager"
 )
 
 setup_ssh_key() {

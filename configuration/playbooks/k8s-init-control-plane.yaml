@@ -4,36 +4,43 @@
   gather_facts: true
   vars:
     k8s_pki_path: /home/ansible/.k8s
-    service_account_key_file: service-accounts.crt
-    service_account_signing_key_file: service-accounts.key
-    tls_cert_file: kube-api-server.crt
-    tls_private_key_file: kube-api-server.key
     ca_file: ca.crt
     etcd_port: 2379
+    k8s_control_plane_version: "v1.31.1"
 
-  tasks:
+  pre_tasks:
     - name: Determine host architecture
       ansible.builtin.set_fact:
-        architecture: "{{ 'arm64' if ansible_architecture == 'aarch64' else ansible_architecture }}"
+        architecture1: "{{ 'arm64' if ansible_architecture == 'aarch64' else ansible_architecture }}"
+
+    - name: Create control plane binaries URL
+      ansible.builtin.set_fact:
+        control_plane_binaries_url: "{{ k8s_control_plane_binaries_url }}/{{ k8s_control_plane_version }}/bin/{{ ansible_system | lower }}/{{ architecture1 }}"
+      vars:
+        k8s_control_plane_binaries_url: "https://dl.k8s.io"
 
   roles:
     - role: display_time
-    - role: journald
+    - role: system_configuration
     - role: etcd
       vars:
         etcd_client_port: "{{ etcd_port }}"
     - role: kube_apiserver
       vars:
+        kube_apiserver_version: "{{ k8s_control_plane_version }}"
         kube_apiserver_etcd_port: "{{ etcd_port }}"
         kube_apiserver_pki_src_path: "{{ k8s_pki_path }}"
-        kube_apiserver_service_account_key_file: "{{ service_account_key_file }}"
-        kube_apiserver_service_account_signing_key_file: "{{ service_account_signing_key_file }}"
+        kube_apiserver_service_account_key_file: "service-accounts.crt"
+        kube_apiserver_service_account_signing_key_file: "service-accounts.key"
         kube_apiserver_client_ca_file: "{{ ca_file }}"
-        kube_apiserver_tls_cert_file: "{{ tls_cert_file }}"
-        kube_apiserver_tls_private_key_file: "{{ tls_private_key_file }}"
-    #    - role: control_plane
-    #      vars:
-    #        control_plane_service_account_keys_src_path: "{{ service_account_keys_src_path }}"
-    #        control_plane_service_account_key_name: "{{ service_account_key_name }}"
-    #        control_plane_service_account_signing_key_name: "{{ service_account_signing_key_name }}"
-    #        control_plane_etcd_port: "{{ etcd_port }}"
+        kube_apiserver_tls_cert_file: "kube-api-server.crt"
+        kube_apiserver_tls_private_key_file: "kube-api-server.key"
+    - role: kube_controller_manager
+      vars:
+        kube_controller_manager_pki_src_path: "{{ k8s_pki_path }}"
+        kube_controller_manager_client_ca_file: "{{ ca_file }}"
+        kube_controller_manager_root_ca_file: "{{ ca_file }}"
+        kube_controller_manager_tls_cert_file: "kube-controller-manager.crt"
+        kube_controller_manager_tls_private_key_file: "kube-controller-manager.key"
+        kube_controller_manager_cluster_signing_cert_file: "{{ ca_file }}"
+        kube_controller_manager_cluster_signing_key_file: "ca.key"

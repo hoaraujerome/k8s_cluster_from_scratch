@@ -1,0 +1,102 @@
+---
+- name: Install kube-controller-manager binary
+  block:
+    # - name: Capture kube-controller-manager installed version
+    #   ansible.builtin.command: "{{ kube_controller_manager_target_path }}/kube-controller-manager --version"
+    #   register: kube_controller_manager_installed
+    #   ignore_errors: true
+    #   changed_when: false
+
+    # - name: Set kube-controller-manager installed version fact
+    #   ansible.builtin.set_fact:
+    #     kube_controller_manager_installed_version: "{{ kube_controller_manager_installed.stdout_lines[0].split(' ')[1] }}"
+    #   when: kube_controller_manager_installed.rc == 0
+
+    # - name: Stop and remove existing kube-controller-manager if version mismatch
+    #   when: kube_controller_manager_installed.rc == 0 and kube_controller_manager_installed_version != kube_controller_manager_version
+    #   block:
+    #     - name: Ensure kube-controller-manager is stopped
+    #       ansible.builtin.systemd_service:
+    #         name: kube-controller-manager
+    #         state: stopped
+    #       become: true
+
+    #     - name: Remove kube-controller-manager target directory
+    #       ansible.builtin.file:
+    #         path: "{{ kube_controller_manager_target_path }}"
+    #         state: absent
+
+    - name: Install kube-controller-manager binary if not installed or version mismatch
+      # when: kube_controller_manager_installed_version|default('') != kube_controller_manager_version
+      block:
+        - name: Download kube-controller-manager binary
+          ansible.builtin.get_url:
+            url: "{{ control_plane_binaries_url }}/kube-controller-manager"
+            dest: "{{ kube_controller_manager_target_path }}"
+            owner: root
+            group: root
+            mode: "0755"
+          become: true
+
+- name: Setup PKI
+  block:
+    - name: Ensure PKI directory exists
+      ansible.builtin.file:
+        path: "{{ kube_controller_manager_pki_path }}"
+        state: directory
+        mode: "0700"
+      become: true
+
+    - name: Copy certs and keys to target directory
+      ansible.builtin.copy:
+        src: "{{ kube_controller_manager_pki_src_path }}/{{ item }}"
+        dest: "{{ kube_controller_manager_pki_path }}"
+        remote_src: false
+        owner: root
+        group: root
+        mode: "0600"
+      loop:
+        # - "{{ kube_controller_manager_service_account_key_file }}"
+        # - "{{ kube_controller_manager_service_account_signing_key_file }}"
+        - "{{ kube_controller_manager_root_ca_file }}"
+        - "{{ kube_controller_manager_client_ca_file }}"
+        - "{{ kube_controller_manager_tls_cert_file }}"
+        - "{{ kube_controller_manager_tls_private_key_file }}"
+        - "{{ kube_controller_manager_cluster_signing_cert_file }}"
+        - "{{ kube_controller_manager_cluster_signing_key_file }}"
+      become: true
+      notify: Restart kube-controller-manager service
+
+- name: Install and configure kube-controller-manager service
+  block:
+    - name: Ensure service env directory exists
+      ansible.builtin.file:
+        path: "{{ kube_controller_manager_service_env_path }}"
+        state: directory
+        mode: "0755"
+      become: true
+
+    - name: Create service environment file
+      ansible.builtin.template:
+        src: kube-controller-manager.env.j2
+        dest: "{{ kube_controller_manager_service_env_path }}/kube-controller-manager"
+        mode: "0644"
+      become: true
+      notify: Restart kube-controller-manager service
+
+    - name: Create systemd service file
+      ansible.builtin.template:
+        src: kube-controller-manager.service.j2
+        dest: /lib/systemd/system/kube-controller-manager.service
+        mode: "0644"
+      become: true
+      notify: Restart kube-controller-manager service
+
+- name: Trigger handler immediately after service configuration
+  ansible.builtin.meta: flush_handlers
+
+- name: Wait for kube-controller-manager port to become available
+  ansible.builtin.wait_for:
+    host: localhost
+    port: 10257
+    timeout: 30

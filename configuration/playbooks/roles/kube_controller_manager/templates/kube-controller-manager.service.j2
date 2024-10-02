@@ -1,0 +1,14 @@
+[Unit]
+Description=kube-controller-manager service
+Documentation=https://github.com/kubernetes/kubernetes
+After=network.target
+
+[Service]
+EnvironmentFile={{ kube_controller_manager_service_env_path }}/kube-controller-manager
+ExecStart={{ kube_controller_manager_target_path }}/kube-controller-manager $DAEMON_OPTS
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+Alias=kube-controller-manager.service
