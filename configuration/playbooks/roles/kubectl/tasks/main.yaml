@@ -1,0 +1,54 @@
+---
+- name: Install kubectl binary
+  block:
+    - name: Capture kubectl installed version
+      ansible.builtin.command: "{{ kubectl_target_path }}/kubectl version --client"
+      register: kubectl_installed
+      ignore_errors: true
+      changed_when: false
+
+    - name: Set kubectl installed version fact
+      ansible.builtin.set_fact:
+        kubectl_installed_version: "{{ kubectl_installed.stdout_lines[0].split(' ')[2] }}"
+      when: kubectl_installed.rc == 0
+
+    - name: Remove existing kubectl if version mismatch
+      when: kubectl_installed.rc == 0 and kubectl_installed_version != kubectl_version
+      ansible.builtin.file:
+        path: "{{ kubectl_target_path }}/kubectl"
+        state: absent
+      become: true
+
+    - name: Install kubectl binary if not installed or version mismatch
+      when: kubectl_installed_version|default('') != kubectl_version
+      block:
+        - name: Download kubectl binary
+          ansible.builtin.get_url:
+            url: "{{ control_plane_binaries_url }}/kubectl"
+            dest: "{{ kubectl_target_path }}"
+            owner: root
+            group: root
+            mode: "0755"
+          become: true
+
+- name: Setup PKI
+  block:
+    - name: Ensure PKI directory exists
+      ansible.builtin.file:
+        path: "{{ kubectl_pki_path }}"
+        state: directory
+        mode: "0700"
+      become: true
+
+    - name: Copy certs and keys to target directory
+      ansible.builtin.copy:
+        src: "{{ kubectl_pki_src_path }}/{{ item }}"
+        dest: "{{ kubectl_pki_path }}"
+        remote_src: false
+        owner: root
+        group: root
+        mode: "0600"
+      loop:
+        - "{{ kubectl_admin_tls_cert_file }}"
+        - "{{ kubectl_admin_tls_private_key_file }}"
+      become: true

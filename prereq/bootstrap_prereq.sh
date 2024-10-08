@@ -13,6 +13,7 @@ certs=(
   "service-accounts"
   "kube-api-server"
   "kube-controller-manager"
+  "admin"
 )
 
 setup_ssh_key() {

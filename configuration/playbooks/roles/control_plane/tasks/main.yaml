@@ -1,4 +1,5 @@
 ---
+# TODO delete this role
 # TODO merge etcd role into control plane
 # TODO merge 2 tasks in 1 logical block
 - name: Check if control plane is installed

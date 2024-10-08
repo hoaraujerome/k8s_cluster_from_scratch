@@ -35,12 +35,18 @@
         kube_apiserver_client_ca_file: "{{ ca_file }}"
         kube_apiserver_tls_cert_file: "kube-api-server.crt"
         kube_apiserver_tls_private_key_file: "kube-api-server.key"
-    - role: kube_controller_manager
+    - role: kubectl
       vars:
-        kube_controller_manager_pki_src_path: "{{ k8s_pki_path }}"
-        kube_controller_manager_client_ca_file: "{{ ca_file }}"
-        kube_controller_manager_root_ca_file: "{{ ca_file }}"
-        kube_controller_manager_tls_cert_file: "kube-controller-manager.crt"
-        kube_controller_manager_tls_private_key_file: "kube-controller-manager.key"
-        kube_controller_manager_cluster_signing_cert_file: "{{ ca_file }}"
-        kube_controller_manager_cluster_signing_key_file: "ca.key"
+        kubectl_version: "{{ k8s_control_plane_version }}"
+        kubectl_pki_src_path: "{{ k8s_pki_path }}"
+        kubectl_admin_tls_cert_file: "admin.crt"
+        kubectl_admin_tls_private_key_file: "admin.key"
+    # - role: kube_controller_manager
+    #   vars:
+    #     kube_controller_manager_pki_src_path: "{{ k8s_pki_path }}"
+    #     kube_controller_manager_client_ca_file: "{{ ca_file }}"
+    #     kube_controller_manager_root_ca_file: "{{ ca_file }}"
+    #     kube_controller_manager_tls_cert_file: "kube-controller-manager.crt"
+    #     kube_controller_manager_tls_private_key_file: "kube-controller-manager.key"
+    #     kube_controller_manager_cluster_signing_cert_file: "{{ ca_file }}"
+    #     kube_controller_manager_cluster_signing_key_file: "ca.key"

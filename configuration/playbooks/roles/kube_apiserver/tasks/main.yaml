@@ -23,8 +23,9 @@
 
         - name: Remove kube-apiserver target directory
           ansible.builtin.file:
-            path: "{{ kube_apiserver_target_path }}"
+            path: "{{ kube_apiserver_target_path }}/kube-apiserver"
             state: absent
+          become: true
 
     - name: Install kube-apiserver binary if not installed or version mismatch
       when: kube_apiserver_installed_version|default('') != kube_apiserver_version
