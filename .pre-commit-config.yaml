@@ -2,6 +2,13 @@
 # See https://pre-commit.com/hooks.html for more hooks
 fail_fast: true
 repos:
+  - repo: local
+    hooks:
+      - id: print-python-version
+        name: Print Python version
+        entry: python3 --version
+        language: system
+        always_run: true
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
@@ -13,7 +20,7 @@ repos:
     hooks:
       - id: gitleaks
   - repo: https://github.com/ansible/ansible-lint
-    rev: v6.22.1
+    rev: v24.9.2
     hooks:
       - id: ansible-lint
         additional_dependencies:
