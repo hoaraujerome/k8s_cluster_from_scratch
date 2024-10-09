@@ -39,6 +39,7 @@
       vars:
         kubectl_version: "{{ k8s_control_plane_version }}"
         kubectl_pki_src_path: "{{ k8s_pki_path }}"
+        kubectl_ca_file: "{{ ca_file }}"
         kubectl_admin_tls_cert_file: "admin.crt"
         kubectl_admin_tls_private_key_file: "admin.key"
     # - role: kube_controller_manager
