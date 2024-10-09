@@ -2,13 +2,6 @@
 # See https://pre-commit.com/hooks.html for more hooks
 fail_fast: true
 repos:
-  - repo: local
-    hooks:
-      - id: print-python-version
-        name: Print Python version
-        entry: python3 --version
-        language: system
-        always_run: true
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
@@ -16,7 +9,7 @@ repos:
         args: ['--allow-multiple-documents']
       - id: detect-aws-credentials
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.16.1
+    rev: v8.20.1
     hooks:
       - id: gitleaks
   - repo: https://github.com/ansible/ansible-lint
