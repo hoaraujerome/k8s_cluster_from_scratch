@@ -54,44 +54,12 @@
         - "{{ kubectl_admin_tls_private_key_file }}"
       become: true
 
-- name: Generate Admin K8S Configuration Files For Authentification
-  block:
-    - name: Set Kubernetes cluster in kubeconfig
-      ansible.builtin.command: >
-        kubectl config set-cluster kubernetes-the-hard-way-on-aws
-        --certificate-authority="{{ kubectl_pki_path }}/{{ kubectl_ca_file }}"
-        --embed-certs=true
-        --server=https://127.0.0.1:6443
-        --kubeconfig=/root/admin.kubeconfig
-      become: true
-      register: kubectl_set_cluster
-      changed_when: kubectl_set_cluster.stdout != ""
-
-    - name: Set Kubernetes credentials in kubeconfig
-      ansible.builtin.command: >
-        kubectl config set-credentials admin
-        --client-certificate="{{ kubectl_pki_path }}/{{ kubectl_admin_tls_cert_file }}"
-        --client-key="{{ kubectl_pki_path }}/{{ kubectl_admin_tls_private_key_file }}"
-        --embed-certs=true
-        --kubeconfig=/root/admin.kubeconfig
-      become: true
-      register: kubectl_set_credentials
-      changed_when: kubectl_set_credentials.stdout != ""
-
-    - name: Set Kubernetes context in kubeconfig
-      ansible.builtin.command: >
-        kubectl config set-context default
-        --cluster=kubernetes-the-hard-way-on-aws
-        --user=admin
-        --kubeconfig=/root/admin.kubeconfig
-      become: true
-      register: kubectl_set_context
-      changed_when: kubectl_set_context.stdout != ""
-
-    - name: Use the default Kubernetes context
-      ansible.builtin.command: >
-        kubectl config use-context default
-        --kubeconfig=/root/admin.kubeconfig
-      become: true
-      register: kubectl_use_context
-      changed_when: kubectl_use_context.stdout != ""
+- name: Generate Admin kubeconfig
+  ansible.builtin.include_role:
+    name: kubectl_config
+  vars:
+    kubectl_config_server: "https://127.0.0.1:6443"
+    kubectl_config_ca_path: "{{ kubectl_pki_path }}/{{ kubectl_ca_file }}"
+    kubectl_config_user: "admin"
+    kubectl_config_client_certificate_path: "{{ kubectl_pki_path }}/{{ kubectl_admin_tls_cert_file }}"
+    kubectl_config_client_key_path: "{{ kubectl_pki_path }}/{{ kubectl_admin_tls_private_key_file }}"

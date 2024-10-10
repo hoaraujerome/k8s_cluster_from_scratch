@@ -1,0 +1,2 @@
+---
+kubectl_config_cluster_name: "kubernetes-the-hard-way-on-aws"

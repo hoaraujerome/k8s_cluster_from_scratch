@@ -67,6 +67,16 @@
       become: true
       notify: Restart kube-controller-manager service
 
+- name: Generate kube-controller-manager kubeconfig
+  ansible.builtin.include_role:
+    name: kubectl_config
+  vars:
+    kubectl_config_server: "https://server.kubernetes.local:6443"
+    kubectl_config_ca_path: "{{ kubectl_pki_path }}/{{ kube_controller_manager_client_ca_file }}"
+    kubectl_config_user: "kube-controller-manager"
+    kubectl_config_client_certificate_path: "{{ kubectl_pki_path }}/{{ kube_controller_manager_tls_cert_file }}"
+    kubectl_config_client_key_path: "{{ kubectl_pki_path }}/{{ kube_controller_manager_tls_private_key_file }}"
+
 - name: Install and configure kube-controller-manager service
   block:
     - name: Ensure service env directory exists

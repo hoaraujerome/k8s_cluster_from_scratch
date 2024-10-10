@@ -1,0 +1,21 @@
+- name: Generate K8S configuration file for authentication
+  ansible.builtin.shell: |
+    kubectl config set-cluster {{ kubectl_config_cluster_name }} \
+      --certificate-authority="{{ kubectl_config_ca_path }}" \
+      --embed-certs=true \
+      --server={{ kubectl_config_server }} \
+      --kubeconfig=/root/{{ kubectl_config_user }}.kubeconfig
+    kubectl config set-credentials {{ kubectl_config_user }} \
+      --client-certificate="{{ kubectl_config_client_certificate_path }}" \
+      --client-key="{{ kubectl_config_client_key_path }}" \
+      --embed-certs=true \
+      --kubeconfig=/root/{{ kubectl_config_user }}.kubeconfig
+    kubectl config set-context default \
+      --cluster={{ kubectl_config_cluster_name }} \
+      --user={{ kubectl_config_user }} \
+      --kubeconfig=/root/{{ kubectl_config_user }}.kubeconfig
+    kubectl config use-context default \
+      --kubeconfig=/root/{{ kubectl_config_user }}.kubeconfig
+  become: true
+  register: kubectl_configure
+  changed_when: kubectl_configure.stdout != ""
