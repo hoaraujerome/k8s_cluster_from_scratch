@@ -18,4 +18,5 @@
       --kubeconfig=/root/{{ kubectl_config_user }}.kubeconfig
   become: true
   register: kubectl_configure
+  # Hack but not clean
   changed_when: kubectl_configure.stdout != ""
