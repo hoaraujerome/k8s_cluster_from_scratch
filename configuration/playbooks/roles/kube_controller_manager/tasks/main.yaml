@@ -1,33 +1,33 @@
 ---
 - name: Install kube-controller-manager binary
   block:
-    # - name: Capture kube-controller-manager installed version
-    #   ansible.builtin.command: "{{ kube_controller_manager_target_path }}/kube-controller-manager --version"
-    #   register: kube_controller_manager_installed
-    #   ignore_errors: true
-    #   changed_when: false
+    - name: Capture kube-controller-manager installed version
+      ansible.builtin.command: "{{ kube_controller_manager_target_path }}/kube-controller-manager --version"
+      register: kube_controller_manager_installed
+      ignore_errors: true
+      changed_when: false
 
-    # - name: Set kube-controller-manager installed version fact
-    #   ansible.builtin.set_fact:
-    #     kube_controller_manager_installed_version: "{{ kube_controller_manager_installed.stdout_lines[0].split(' ')[1] }}"
-    #   when: kube_controller_manager_installed.rc == 0
+    - name: Set kube-controller-manager installed version fact
+      ansible.builtin.set_fact:
+        kube_controller_manager_installed_version: "{{ kube_controller_manager_installed.stdout_lines[0].split(' ')[1] }}"
+      when: kube_controller_manager_installed.rc == 0
 
-    # - name: Stop and remove existing kube-controller-manager if version mismatch
-    #   when: kube_controller_manager_installed.rc == 0 and kube_controller_manager_installed_version != kube_controller_manager_version
-    #   block:
-    #     - name: Ensure kube-controller-manager is stopped
-    #       ansible.builtin.systemd_service:
-    #         name: kube-controller-manager
-    #         state: stopped
-    #       become: true
+    - name: Stop and remove existing kube-controller-manager if version mismatch
+      when: kube_controller_manager_installed.rc == 0 and kube_controller_manager_installed_version != kube_controller_manager_version
+      block:
+        - name: Ensure kube-controller-manager is stopped
+          ansible.builtin.systemd_service:
+            name: kube-controller-manager
+            state: stopped
+          become: true
 
-    #     - name: Remove kube-controller-manager target directory
-    #       ansible.builtin.file:
-    #         path: "{{ kube_controller_manager_target_path }}"
-    #         state: absent
+        - name: Remove kube-controller-manager target directory
+          ansible.builtin.file:
+            path: "{{ kube_controller_manager_target_path }}"
+            state: absent
 
     - name: Install kube-controller-manager binary if not installed or version mismatch
-      # when: kube_controller_manager_installed_version|default('') != kube_controller_manager_version
+      when: kube_controller_manager_installed_version|default('') != kube_controller_manager_version
       block:
         - name: Download kube-controller-manager binary
           ansible.builtin.get_url:
@@ -56,8 +56,7 @@
         group: root
         mode: "0600"
       loop:
-        # - "{{ kube_controller_manager_service_account_key_file }}"
-        # - "{{ kube_controller_manager_service_account_signing_key_file }}"
+        - "{{ kube_controller_manager_service_account_private_key_file }}"
         - "{{ kube_controller_manager_root_ca_file }}"
         - "{{ kube_controller_manager_client_ca_file }}"
         - "{{ kube_controller_manager_tls_cert_file }}"
@@ -73,7 +72,7 @@
   vars:
     kubectl_config_server: "https://server.kubernetes.local:6443"
     kubectl_config_ca_path: "{{ kubectl_pki_path }}/{{ kube_controller_manager_client_ca_file }}"
-    kubectl_config_user: "kube-controller-manager"
+    kubectl_config_user: "{{ kube_controller_manager_name }}"
     kubectl_config_client_certificate_path: "{{ kubectl_pki_path }}/{{ kube_controller_manager_tls_cert_file }}"
     kubectl_config_client_key_path: "{{ kubectl_pki_path }}/{{ kube_controller_manager_tls_private_key_file }}"
 

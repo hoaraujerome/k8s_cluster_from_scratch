@@ -2,23 +2,4 @@
 kube_controller_manager_target_path: "/usr/local/bin"
 kube_controller_manager_pki_path: "/var/lib/kubernetes"
 kube_controller_manager_service_env_path: "/etc/default"
-
-# ***
-# kube-controller-manager options
-# ***
-# TODO port as variable
-kube_controller_manager_api_server_address: "https://127.0.0.1:6443"
-# TODO clean up
-# Do not change service_cluster_ip_range after the cluster has already been brought up once
-# https://github.com/k3s-io/k3s/issues/3489
-# kube_controller_manager_service_cluster_ip_range: "10.32.0.0/24"
-# kube_controller_manager_service_account_issuer: "https://kubernetes.default.svc"
-# kube_controller_manager_auth_modes: "RBAC"
-# kube_controller_manager_audit_log:
-#   maxage: 30
-#   maxbackup: 3
-#   maxsize: 100
-# kube_controller_manager_audit_log_path: "/var/log/k8s_audit.log"
-# kube_controller_manager_bind_address: "0.0.0.0"
-# If not set, default to the internal IP address of the node
-# kube_controller_manager_external_hostname: X.X.X.X
+kube_controller_manager_name: "kube-controller-manager"

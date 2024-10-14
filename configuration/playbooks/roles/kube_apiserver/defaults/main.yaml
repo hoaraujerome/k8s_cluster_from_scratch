@@ -6,9 +6,6 @@ kube_apiserver_service_env_path: "/etc/default"
 # ***
 # kube-apiserver options
 # ***
-# Do not change service_cluster_ip_range after the cluster has already been brought up once
-# https://github.com/k3s-io/k3s/issues/3489
-kube_apiserver_service_cluster_ip_range: "10.32.0.0/24"
 kube_apiserver_service_account_issuer: "https://kubernetes.default.svc"
 kube_apiserver_auth_modes: "RBAC"
 kube_apiserver_audit_log:
