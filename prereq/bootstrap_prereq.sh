@@ -14,6 +14,7 @@ certs=(
   "kube-api-server"
   "kube-controller-manager"
   "admin"
+  "kube-scheduler"
 )
 
 setup_ssh_key() {

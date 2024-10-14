@@ -1,0 +1,6 @@
+---
+kube_scheduler_target_path: "/usr/local/bin"
+kube_scheduler_pki_path: "/var/lib/kubernetes"
+kube_scheduler_service_env_path: "/etc/default"
+kube_scheduler_config_path: "/etc/kubernetes/config"
+kube_scheduler_name: "kube-scheduler"

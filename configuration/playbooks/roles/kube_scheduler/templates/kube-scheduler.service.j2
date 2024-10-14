@@ -1,0 +1,14 @@
+[Unit]
+Description=kube-scheduler service
+Documentation=https://github.com/kubernetes/kubernetes
+After=network.target
+
+[Service]
+EnvironmentFile={{ kube_scheduler_service_env_path }}/kube-scheduler
+ExecStart={{ kube_scheduler_target_path }}/kube-scheduler $DAEMON_OPTS
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+Alias=kube-scheduler.service

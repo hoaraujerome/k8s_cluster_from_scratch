@@ -1,0 +1,127 @@
+---
+- name: Install kube-scheduler binary
+  block:
+    - name: Capture kube-scheduler installed version
+      ansible.builtin.command: "{{ kube_scheduler_target_path }}/kube-scheduler --version"
+      register: kube_scheduler_installed
+      ignore_errors: true
+      changed_when: false
+
+    - name: Set kube-scheduler installed version fact
+      ansible.builtin.set_fact:
+        kube_scheduler_installed_version: "{{ kube_scheduler_installed.stdout_lines[0].split(' ')[1] }}"
+      when: kube_scheduler_installed.rc == 0
+
+    - name: Stop and remove existing kube-scheduler if version mismatch
+      when: kube_scheduler_installed.rc == 0 and kube_scheduler_installed_version != kube_scheduler_version
+      block:
+        - name: Ensure kube-scheduler is stopped
+          ansible.builtin.systemd_service:
+            name: kube-scheduler
+            state: stopped
+          become: true
+
+        - name: Remove kube-scheduler target directory
+          ansible.builtin.file:
+            path: "{{ kube_scheduler_target_path }}"
+            state: absent
+
+    - name: Install kube-scheduler binary if not installed or version mismatch
+      when: kube_scheduler_installed_version|default('') != kube_scheduler_version
+      block:
+        - name: Download kube-scheduler binary
+          ansible.builtin.get_url:
+            url: "{{ control_plane_binaries_url }}/kube-scheduler"
+            dest: "{{ kube_scheduler_target_path }}"
+            owner: root
+            group: root
+            mode: "0755"
+          become: true
+
+- name: Setup PKI
+  block:
+    - name: Ensure PKI directory exists
+      ansible.builtin.file:
+        path: "{{ kube_scheduler_pki_path }}"
+        state: directory
+        mode: "0700"
+      become: true
+
+    - name: Copy certs and keys to target directory
+      ansible.builtin.copy:
+        src: "{{ kube_scheduler_pki_src_path }}/{{ item }}"
+        dest: "{{ kube_scheduler_pki_path }}"
+        remote_src: false
+        owner: root
+        group: root
+        mode: "0600"
+      loop:
+        # - "{{ kube_scheduler_service_account_private_key_file }}"
+        # - "{{ kube_scheduler_root_ca_file }}"
+        - "{{ kube_scheduler_client_ca_file }}"
+        - "{{ kube_scheduler_tls_cert_file }}"
+        - "{{ kube_scheduler_tls_private_key_file }}"
+        # - "{{ kube_scheduler_cluster_signing_cert_file }}"
+        # - "{{ kube_scheduler_cluster_signing_key_file }}"
+      become: true
+      notify: Restart kube-scheduler service
+
+- name: Setup Scheduler Configuration
+  block:
+    - name: Generate kube-scheduler kubeconfig
+      ansible.builtin.include_role:
+        name: kubectl_config
+      vars:
+        kubectl_config_server: "https://server.kubernetes.local:6443"
+        kubectl_config_ca_path: "{{ kubectl_pki_path }}/{{ kube_scheduler_client_ca_file }}"
+        kubectl_config_user: "{{ kube_scheduler_name }}"
+        kubectl_config_client_certificate_path: "{{ kubectl_pki_path }}/{{ kube_scheduler_tls_cert_file }}"
+        kubectl_config_client_key_path: "{{ kubectl_pki_path }}/{{ kube_scheduler_tls_private_key_file }}"
+
+    - name: Ensure scheduler config directory exists
+      ansible.builtin.file:
+        path: "{{ kube_scheduler_config_path }}"
+        state: directory
+        mode: "0755"
+      become: true
+
+    - name: Generate scheduler configuration manifest
+      ansible.builtin.template:
+        src: kube-scheduler-configuration.yaml.j2
+        dest: "{{ kube_scheduler_config_path }}/{{ kube_scheduler_name }}.yaml"
+        mode: "0644"
+      become: true
+
+- name: Install and configure kube-scheduler service
+  block:
+    - name: Ensure service env directory exists
+      ansible.builtin.file:
+        path: "{{ kube_scheduler_service_env_path }}"
+        state: directory
+        mode: "0755"
+      become: true
+
+    - name: Create service environment file
+      ansible.builtin.template:
+        src: kube-scheduler.env.j2
+        dest: "{{ kube_scheduler_service_env_path }}/kube-scheduler"
+        mode: "0644"
+      become: true
+      notify: Restart kube-scheduler service
+
+    - name: Create systemd service file
+      ansible.builtin.template:
+        src: kube-scheduler.service.j2
+        dest: /lib/systemd/system/kube-scheduler.service
+        mode: "0644"
+      become: true
+      notify: Restart kube-scheduler service
+
+- name: Trigger handler immediately after service configuration
+  ansible.builtin.meta: flush_handlers
+
+- name: Wait for kube-scheduler port to become available
+  ansible.builtin.wait_for:
+    host: localhost
+    port: 10259
+    timeout: 30

@@ -59,3 +59,10 @@
         kube_controller_manager_cluster_signing_key_file: "ca.key"
         kube_controller_manager_service_account_private_key_file: "{{ service_account_private_key_file }}"
         kube_controller_manager_service_cluster_ip_range: "{{ k8s_service_cluster_ip_range }}"
+    - role: kube_scheduler
+      vars:
+        kube_scheduler_version: "{{ k8s_control_plane_version }}"
+        kube_scheduler_pki_src_path: "{{ k8s_pki_path }}"
+        kube_scheduler_client_ca_file: "{{ ca_file }}"
+        kube_scheduler_tls_cert_file: "kube-scheduler.crt"
+        kube_scheduler_tls_private_key_file: "kube-scheduler.key"
