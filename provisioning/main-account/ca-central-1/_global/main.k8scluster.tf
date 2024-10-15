@@ -31,7 +31,7 @@ module "k8s-cluster-security-group-rules" {
   tag_prefix = local.tag_prefix
 }
 
-module "k8s-cluster-ec2" {
+module "k8s-cluster-ec2-control-plane" {
   source = "../../../modules/compute-ec2"
 
   subnet_id                   = module.vpc.subnet_ids_by_name["${local.tag_prefix}k8s-cluster-subnet"]
@@ -44,18 +44,47 @@ module "k8s-cluster-ec2" {
   }
 }
 
-check "k8s_cluster_health_check" {
+module "k8s-cluster-ec2-worker-node" {
+  source = "../../../modules/compute-ec2"
+
+  subnet_id                   = module.vpc.subnet_ids_by_name["${local.tag_prefix}k8s-cluster-subnet"]
+  security_group_ids          = [module.k8s-cluster-security-group.security_group_id]
+  key_pair_name               = module.bastion-ssh-public-key.key_pair_name
+  associate_public_ip_address = false
+  tags = {
+    Name = "${local.tag_prefix}k8s-worker-node"
+    Role = "k8s-worker-node"
+  }
+}
+
+check "k8s_cluster_control_plane_health_check" {
   data "external" "ssh_control_plane" {
     program = ["bash", "${path.module}/ssh-private-server.sh"]
 
     query = {
       bastion_public_dns = module.bastion-ec2.instance_public_dns
-      private_server_dns = module.k8s-cluster-ec2.instance_private_dns
+      private_server_dns = module.k8s-cluster-ec2-control-plane.instance_private_dns
     }
   }
 
   assert {
     condition     = data.external.ssh_control_plane.result["health"] == "ok"
-    error_message = "unable to validate SSH ${module.k8s-cluster-ec2.instance_private_dns}"
+    error_message = "unable to validate SSH ${module.k8s-cluster-ec2-control-plane.instance_private_dns}"
+  }
+}
+
+check "k8s_cluster_worker_node_health_check" {
+  data "external" "ssh_worker_node" {
+    program = ["bash", "${path.module}/ssh-private-server.sh"]
+
+    query = {
+      bastion_public_dns = module.bastion-ec2.instance_public_dns
+      private_server_dns = module.k8s-cluster-ec2-worker-node.instance_private_dns
+    }
+  }
+
+  assert {
+    condition     = data.external.ssh_worker_node.result["health"] == "ok"
+    error_message = "unable to validate SSH ${module.k8s-cluster-ec2-worker-node.instance_private_dns}"
   }
 }
