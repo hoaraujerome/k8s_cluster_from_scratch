@@ -1,0 +1,7 @@
+---
+- name: Create DNS K8S server aliases
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    state: present
+    line: "{{ ansible_default_ipv4.address | default(ansible_all_ipv4_addresses[0]) }} server server.kubernetes.local"
+  become: true

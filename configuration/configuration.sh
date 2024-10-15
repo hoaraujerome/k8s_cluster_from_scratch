@@ -24,12 +24,19 @@ EOF
     echo "  ProxyJump bastion" >>~/.ssh_config
   done
 
+  hostnames=$(echo $ansible_inventory | jq -r '.k8s_worker_node.hosts[]')
+  for hostname in $hostnames; do
+    echo "Host $hostname" >>~/.ssh_config
+    echo "  ProxyJump bastion" >>~/.ssh_config
+  done
+
   mv ~/.ssh_config ~/.ssh/config
 }
 
 create_cluster() {
   generate_ssh_config_file
   ansible-playbook playbooks/k8s-init-control-plane.yaml
+  ansible-playbook playbooks/k8s-init-worker-node.yaml
 }
 
 if [ -z "$1" ]; then

@@ -1,0 +1,11 @@
+---
+- name: Check if swap is enabled
+  ansible.builtin.command: swapon --show
+  register: swap_check
+  ignore_errors: true
+  changed_when: false
+
+- name: Ensure swap is not enabled
+  ansible.builtin.fail:
+    msg: "Swap is enabled on the system"
+  when: swap_check.stdout != ""

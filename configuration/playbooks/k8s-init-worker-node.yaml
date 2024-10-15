@@ -1,0 +1,9 @@
+---
+- name: Bootstrap K8S worker node
+  hosts: k8s_worker_node
+  gather_facts: true
+
+  roles:
+    - role: display_time
+    - role: journald
+    - role: worker_node_system_configuration

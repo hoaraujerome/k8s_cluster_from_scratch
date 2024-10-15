@@ -25,7 +25,8 @@
 
   roles:
     - role: display_time
-    - role: system_configuration
+    - role: journald
+    - role: control_plane_system_configuration
     - role: etcd
       vars:
         etcd_client_port: "{{ etcd_port }}"
