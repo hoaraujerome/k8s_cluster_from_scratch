@@ -1,5 +1,5 @@
 # Makefile
-.PHONY: k8s-init-master-nodes
+.PHONY: create-cluster
 
 CONFIGURATION_SCRIPT = ./configuration.sh
 
