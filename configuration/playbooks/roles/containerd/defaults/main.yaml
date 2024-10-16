@@ -1,0 +1,8 @@
+---
+containerd_version: "1.7.22"
+containerd_version_prefixed: "v{{ containerd_version }}"
+containerd_binaries_base_url: "https://github.com/containerd/containerd/releases/download"
+containerd_binaries_tarball_path: "{{ containerd_version_prefixed }}/containerd-{{ containerd_version }}-{{ ansible_system | lower }}-{{ architecture }}.tar.gz"
+containerd_archive_path: "/tmp/containerd.tar.gz"
+containerd_extracted_archive_path: "/tmp/containerd"
+containerd_target_path: "/usr/local/bin"

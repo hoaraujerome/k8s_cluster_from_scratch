@@ -7,3 +7,4 @@
     - role: display_time
     - role: journald
     - role: worker_node_system_configuration
+    - role: containerd

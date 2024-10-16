@@ -13,13 +13,9 @@
     k8s_service_cluster_ip_range: "10.32.0.0/24"
 
   pre_tasks:
-    - name: Determine host architecture
-      ansible.builtin.set_fact:
-        architecture1: "{{ 'arm64' if ansible_architecture == 'aarch64' else ansible_architecture }}"
-
     - name: Create control plane binaries URL
       ansible.builtin.set_fact:
-        control_plane_binaries_url: "{{ k8s_control_plane_binaries_url }}/{{ k8s_control_plane_version }}/bin/{{ ansible_system | lower }}/{{ architecture1 }}"
+        control_plane_binaries_url: "{{ k8s_control_plane_binaries_url }}/{{ k8s_control_plane_version }}/bin/{{ ansible_system | lower }}/{{ architecture }}"
       vars:
         k8s_control_plane_binaries_url: "https://dl.k8s.io"
 
