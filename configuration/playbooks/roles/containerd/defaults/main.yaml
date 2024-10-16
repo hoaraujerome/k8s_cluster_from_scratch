@@ -6,3 +6,4 @@ containerd_binaries_tarball_path: "{{ containerd_version_prefixed }}/containerd-
 containerd_archive_path: "/tmp/containerd.tar.gz"
 containerd_extracted_archive_path: "/tmp/containerd"
 containerd_target_path: "/usr/local/bin"
+containerd_config_path: "/etc/containerd"

@@ -12,19 +12,20 @@
         containerd_installed_version: "{{ containerd_installed.stdout_lines[0].split(' ')[2] }}"
       when: containerd_installed.rc == 0
 
-    # - name: Stop and remove existing containerd if version mismatch
-    #   when: containerd_installed.rc == 0 and containerd_installed_version != containerd_version
-    #   block:
-    #     - name: Ensure containerd is stopped
-    #       ansible.builtin.systemd_service:
-    #         name: containerd
-    #         state: stopped
-    #       become: true
+    - name: Stop and remove existing containerd if version mismatch
+      when: containerd_installed.rc == 0 and containerd_installed_version != containerd_version_prefixed
+      block:
+        - name: Ensure containerd is stopped
+          ansible.builtin.systemd_service:
+            name: containerd
+            state: stopped
+          become: true
 
-    #     - name: Remove containerd target directory
-    #       ansible.builtin.file:
-    #         path: "{{ containerd_target_path }}"
-    #         state: absent
+        - name: Remove containerd target directory
+          ansible.builtin.file:
+            path: "{{ containerd_target_path }}"
+            state: absent
+          become: true
 
     - name: Install containerd binary if not installed or version mismatch
       when: containerd_installed_version|default('') != containerd_version_prefixed
@@ -57,6 +58,7 @@
             group: root
             mode: "0755"
           become: true
+          notify: Restart containerd service
 
         - name: Delete containerd extracted archive directory
           ansible.builtin.file:
@@ -68,92 +70,33 @@
             path: "{{ containerd_archive_path }}"
             state: absent
 
-        # TODO check restart / notify service
+- name: Install and configure containerd service
+  block:
+    - name: Ensure config directory exists
+      ansible.builtin.file:
+        path: "{{ containerd_config_path }}"
+        state: directory
+        mode: "0755"
+      become: true
 
-# - name: Setup PKI
-#   block:
-#     - name: Ensure PKI directory exists
-#       ansible.builtin.file:
-#         path: "{{ containerd_pki_path }}"
-#         state: directory
-#         mode: "0700"
-#       become: true
-#
-#     - name: Copy certs and keys to target directory
-#       ansible.builtin.copy:
-#         src: "{{ containerd_pki_src_path }}/{{ item }}"
-#         dest: "{{ containerd_pki_path }}"
-#         remote_src: false
-#         owner: root
-#         group: root
-#         mode: "0600"
-#       loop:
-#         # - "{{ containerd_service_account_private_key_file }}"
-#         # - "{{ containerd_root_ca_file }}"
-#         - "{{ containerd_client_ca_file }}"
-#         - "{{ containerd_tls_cert_file }}"
-#         - "{{ containerd_tls_private_key_file }}"
-#         # - "{{ containerd_cluster_signing_cert_file }}"
-#         # - "{{ containerd_cluster_signing_key_file }}"
-#       become: true
-#       notify: Restart containerd service
-#
-# - name: Setup Scheduler Configuration
-#   block:
-#     - name: Generate containerd kubeconfig
-#       ansible.builtin.include_role:
-#         name: kubectl_config
-#       vars:
-#         kubectl_config_server: "https://server.kubernetes.local:6443"
-#         kubectl_config_ca_path: "{{ kubectl_pki_path }}/{{ containerd_client_ca_file }}"
-#         kubectl_config_user: "{{ containerd_name }}"
-#         kubectl_config_client_certificate_path: "{{ kubectl_pki_path }}/{{ containerd_tls_cert_file }}"
-#         kubectl_config_client_key_path: "{{ kubectl_pki_path }}/{{ containerd_tls_private_key_file }}"
-#
-#     - name: Ensure scheduler config directory exists
-#       ansible.builtin.file:
-#         path: "{{ containerd_config_path }}"
-#         state: directory
-#         mode: "0755"
-#       become: true
-#
-#     - name: Generate scheduler configuration manifest
-#       ansible.builtin.template:
-#         src: containerd-configuration.yaml.j2
-#         dest: "{{ containerd_config_path }}/{{ containerd_name }}.yaml"
-#         mode: "0644"
-#       become: true
-#
-# - name: Install and configure containerd service
-#   block:
-#     - name: Ensure service env directory exists
-#       ansible.builtin.file:
-#         path: "{{ containerd_service_env_path }}"
-#         state: directory
-#         mode: "0755"
-#       become: true
-#
-#     - name: Create service environment file
-#       ansible.builtin.template:
-#         src: containerd.env.j2
-#         dest: "{{ containerd_service_env_path }}/containerd"
-#         mode: "0644"
-#       become: true
-#       notify: Restart containerd service
-#
-#     - name: Create systemd service file
-#       ansible.builtin.template:
-#         src: containerd.service.j2
-#         dest: /lib/systemd/system/containerd.service
-#         mode: "0644"
-#       become: true
-#       notify: Restart containerd service
-#
-# - name: Trigger handler immediately after service configuration
-#   ansible.builtin.meta: flush_handlers
-#
-# - name: Wait for containerd port to become available
-#   ansible.builtin.wait_for:
-#     host: localhost
-#     port: 10259
-#     timeout: 30
+    - name: Copy config file
+      ansible.builtin.copy:
+        src: files/containerd-config.toml
+        dest: "{{ containerd_config_path }}/config.toml"
+        remote_src: false
+        owner: root
+        group: root
+        mode: "0644"
+      become: true
+      notify: Restart containerd service
+
+    - name: Create systemd service file
+      ansible.builtin.template:
+        src: containerd.service.j2
+        dest: /lib/systemd/system/containerd.service
+        mode: "0644"
+      become: true
+      notify: Restart containerd service
+
+- name: Trigger handler immediately after service configuration
+  ansible.builtin.meta: flush_handlers
