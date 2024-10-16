@@ -56,13 +56,9 @@
         group: root
         mode: "0600"
       loop:
-        # - "{{ kube_scheduler_service_account_private_key_file }}"
-        # - "{{ kube_scheduler_root_ca_file }}"
         - "{{ kube_scheduler_client_ca_file }}"
         - "{{ kube_scheduler_tls_cert_file }}"
         - "{{ kube_scheduler_tls_private_key_file }}"
-        # - "{{ kube_scheduler_cluster_signing_cert_file }}"
-        # - "{{ kube_scheduler_cluster_signing_key_file }}"
       become: true
       notify: Restart kube-scheduler service
 
