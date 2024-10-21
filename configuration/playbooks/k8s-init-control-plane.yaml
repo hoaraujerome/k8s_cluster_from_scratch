@@ -11,6 +11,8 @@
     # Do not change service_cluster_ip_range after the cluster has already been brought up once
     # https://github.com/k3s-io/k3s/issues/3489
     k8s_service_cluster_ip_range: "10.32.0.0/24"
+  vars_files:
+    - vars/common_vars.yaml
 
   pre_tasks:
     - name: Create control plane binaries URL

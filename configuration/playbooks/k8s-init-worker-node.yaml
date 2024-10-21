@@ -2,6 +2,8 @@
 - name: Bootstrap K8S worker node
   hosts: k8s_worker_node
   gather_facts: true
+  vars_files:
+    - vars/common_vars.yaml
 
   roles:
     - role: display_time

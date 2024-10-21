@@ -1,0 +1,3 @@
+---
+# Should NOT overlap AWS subnets
+pods_cidr_range: "10.200.0.0/16"

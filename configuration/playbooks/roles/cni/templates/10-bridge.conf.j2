@@ -1,0 +1,21 @@
+{#
+ Tells the CNI bridge plugin:
+ * to route all outbound traffic from the pod to any external destination through the gateway (GW).
+ GW = the host will act as a gateway for the containers connected to the bridge.
+ * traffic from the containers to the outside world will be masqueraded (NAT)
+#}
+{
+  "cniVersion": "1.0.0",
+  "name": "bridge",
+  "type": "bridge",
+  "bridge": "cni0",
+  "isGateway": true,
+  "ipMasq": true,
+  "ipam": {
+    "type": "host-local",
+    "ranges": [
+      [{"subnet": "{{ pods_cidr_range }}"}]
+    ],
+    "routes": [{"dst": "0.0.0.0/0"}]
+  }
+}

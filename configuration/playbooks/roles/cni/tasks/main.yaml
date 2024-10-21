@@ -1,0 +1,99 @@
+---
+- name: Install cni-plugins binary
+  block:
+    - name: Capture cni-plugins installed version
+      ansible.builtin.command: "{{ cni_plugins_target_path }}/host-local -V"
+      register: cni_plugins_installed
+      ignore_errors: true
+      changed_when: false
+
+    - name: Set cni-plugins installed version fact
+      ansible.builtin.set_fact:
+        cni_plugins_installed_version: "{{ cni_plugins_installed.stderr_lines[0].split(' ')[3] }}"
+      when: cni_plugins_installed.rc == 0
+
+    - name: Stop containerd and remove existing cni-plugins if version mismatch
+      when: cni_plugins_installed.rc == 0 and cni_plugins_installed_version != cni_plugins_version
+      block:
+        - name: Ensure containerd is stopped
+          ansible.builtin.systemd_service:
+            name: containerd
+            state: stopped
+          become: true
+
+        - name: Remove cni-plugins target directory
+          ansible.builtin.file:
+            path: "{{ cni_plugins_target_path }}"
+            state: absent
+          become: true
+
+    - name: Install cni-plugins binary if not installed or version mismatch
+      when: cni_plugins_installed_version|default('') != cni_plugins_version
+      block:
+        - name: Download cni-plugins archive
+          ansible.builtin.get_url:
+            url: "{{ cni_plugins_binaries_base_url }}/{{ cni_plugins_binaries_tarball_path }}"
+            dest: "{{ cni_plugins_archive_path }}"
+            mode: "0600"
+
+        - name: Ensure cni-plugins extracted archive directory exists
+          ansible.builtin.file:
+            path: "{{ cni_plugins_extracted_archive_path }}"
+            state: directory
+            mode: "0700"
+
+        - name: Extract cni-plugins archive
+          ansible.builtin.unarchive:
+            src: "{{ cni_plugins_archive_path }}"
+            dest: "{{ cni_plugins_extracted_archive_path }}"
+            copy: false
+            extra_opts: "--strip-components=1"
+
+        - name: Ensure target path directory exists
+          ansible.builtin.file:
+            path: "{{ cni_plugins_target_path }}"
+            state: directory
+            mode: "0755"
+          become: true
+
+        - name: Copy cni-plugins binaries
+          ansible.builtin.copy:
+            src: "{{ cni_plugins_extracted_archive_path }}/"
+            dest: "{{ cni_plugins_target_path }}"
+            remote_src: true
+            owner: root
+            group: root
+            mode: "0755"
+          become: true
+          notify: Restart containerd service
+
+        - name: Delete cni-plugins extracted archive directory
+          ansible.builtin.file:
+            path: "{{ cni_plugins_extracted_archive_path }}"
+            state: absent
+
+        - name: Delete cni-plugins archive
+          ansible.builtin.file:
+            path: "{{ cni_plugins_archive_path }}"
+            state: absent
+
+- name: Configure cni-plugins
+  block:
+    - name: Create bridge config file
+      ansible.builtin.template:
+        src: 10-bridge.conf.j2
+        dest: "{{ containerd_cni_plugins_config_path }}/10-bridge.conf"
+        mode: "0600"
+      become: true
+      notify: Restart containerd service
+
+    - name: Create loopback config file
+      ansible.builtin.copy:
+        src: files/99-loopback.conf
+        dest: "{{ containerd_cni_plugins_config_path }}/99-loopback.conf"
+        remote_src: false
+        owner: root
+        group: root
+        mode: "0600"
+      become: true
+      notify: Restart containerd service

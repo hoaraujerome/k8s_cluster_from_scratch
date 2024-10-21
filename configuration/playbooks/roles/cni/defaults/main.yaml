@@ -1,0 +1,6 @@
+---
+cni_plugins_version: "v1.6.0"
+cni_plugins_binaries_base_url: "https://github.com/containernetworking/plugins/releases/download"
+cni_plugins_binaries_tarball_path: "{{ cni_plugins_version }}/cni-plugins-{{ ansible_system | lower }}-{{ architecture }}-{{ cni_plugins_version }}.tgz"
+cni_plugins_archive_path: "/tmp/cni-plugins.tgz"
+cni_plugins_extracted_archive_path: "/tmp/cni-plugins"

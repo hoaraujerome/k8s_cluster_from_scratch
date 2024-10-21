@@ -1,4 +1,11 @@
 ---
+- name: Install CNI plugins
+  ansible.builtin.include_role:
+    name: cni
+  vars:
+    cni_plugins_target_path: "{{ containerd_cni_plugins_target_path }}"
+    cni_plugins_config_path: "{{ containerd_cni_plugins_config_path }}"
+
 - name: Install containerd binary
   block:
     - name: Capture containerd installed version
@@ -80,12 +87,9 @@
       become: true
 
     - name: Copy config file
-      ansible.builtin.copy:
-        src: files/containerd-config.toml
+      ansible.builtin.template:
+        src: containerd-config.toml.j2
         dest: "{{ containerd_config_path }}/config.toml"
-        remote_src: false
-        owner: root
-        group: root
         mode: "0644"
       become: true
       notify: Restart containerd service
