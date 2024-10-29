@@ -5,7 +5,19 @@
   vars_files:
     - vars/common_vars.yaml
 
+  pre_tasks:
+    - name: Include K8S binaries URL setup task
+      ansible.builtin.include_tasks: tasks/set_k8s_binaries_url.yaml
+
   roles:
+    # TODO move to the end
+    - role: kubelet
+      vars:
+        kubelet_version: "{{ k8s_version }}"
+        kubelet_pki_src_path: "{{ k8s_pki_path }}"
+        kubelet_client_ca_file: "{{ ca_file }}"
+        kubelet_tls_cert_file: "node-0.crt"
+        kubelet_tls_private_key_file: "node-0.key"
     - role: display_time
     - role: journald
     - role: worker_node_system_configuration

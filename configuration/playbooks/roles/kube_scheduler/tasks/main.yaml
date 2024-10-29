@@ -31,7 +31,7 @@
       block:
         - name: Download kube-scheduler binary
           ansible.builtin.get_url:
-            url: "{{ control_plane_binaries_url }}/kube-scheduler"
+            url: "{{ k8s_binaries_url }}/kube-scheduler"
             dest: "{{ kube_scheduler_target_path }}"
             owner: root
             group: root

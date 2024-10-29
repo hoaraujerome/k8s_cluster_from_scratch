@@ -24,7 +24,7 @@
       block:
         - name: Download kubectl binary
           ansible.builtin.get_url:
-            url: "{{ control_plane_binaries_url }}/kubectl"
+            url: "{{ k8s_binaries_url }}/kubectl"
             dest: "{{ kubectl_target_path }}"
             owner: root
             group: root

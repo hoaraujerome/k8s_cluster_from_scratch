@@ -1,0 +1,6 @@
+---
+- name: Set K8S binaries URL
+  ansible.builtin.set_fact:
+    k8s_binaries_url: "{{ k8s_binaries_base_url }}/{{ k8s_version }}/bin/{{ ansible_system | lower }}/{{ architecture }}"
+  vars:
+    k8s_binaries_base_url: "https://dl.k8s.io"

@@ -3,11 +3,8 @@
   hosts: k8s_control_plane
   gather_facts: true
   vars:
-    k8s_pki_path: /home/ansible/.k8s
-    ca_file: ca.crt
     service_account_private_key_file: "service-accounts.key"
     etcd_port: 2379
-    k8s_control_plane_version: "v1.31.1"
     # Do not change service_cluster_ip_range after the cluster has already been brought up once
     # https://github.com/k3s-io/k3s/issues/3489
     k8s_service_cluster_ip_range: "10.32.0.0/24"
@@ -15,11 +12,8 @@
     - vars/common_vars.yaml
 
   pre_tasks:
-    - name: Create control plane binaries URL
-      ansible.builtin.set_fact:
-        control_plane_binaries_url: "{{ k8s_control_plane_binaries_url }}/{{ k8s_control_plane_version }}/bin/{{ ansible_system | lower }}/{{ architecture }}"
-      vars:
-        k8s_control_plane_binaries_url: "https://dl.k8s.io"
+    - name: Include K8S binaries URL setup task
+      ansible.builtin.include_tasks: tasks/set_k8s_binaries_url.yaml
 
   roles:
     - role: display_time
@@ -30,7 +24,7 @@
         etcd_client_port: "{{ etcd_port }}"
     - role: kube_apiserver
       vars:
-        kube_apiserver_version: "{{ k8s_control_plane_version }}"
+        kube_apiserver_version: "{{ k8s_version }}"
         kube_apiserver_etcd_port: "{{ etcd_port }}"
         kube_apiserver_pki_src_path: "{{ k8s_pki_path }}"
         kube_apiserver_service_account_key_file: "service-accounts.crt"
@@ -41,14 +35,14 @@
         kube_apiserver_service_cluster_ip_range: "{{ k8s_service_cluster_ip_range }}"
     - role: kubectl
       vars:
-        kubectl_version: "{{ k8s_control_plane_version }}"
+        kubectl_version: "{{ k8s_version }}"
         kubectl_pki_src_path: "{{ k8s_pki_path }}"
         kubectl_ca_file: "{{ ca_file }}"
         kubectl_admin_tls_cert_file: "admin.crt"
         kubectl_admin_tls_private_key_file: "admin.key"
     - role: kube_controller_manager
       vars:
-        kube_controller_manager_version: "{{ k8s_control_plane_version }}"
+        kube_controller_manager_version: "{{ k8s_version }}"
         kube_controller_manager_pki_src_path: "{{ k8s_pki_path }}"
         kube_controller_manager_client_ca_file: "{{ ca_file }}"
         kube_controller_manager_root_ca_file: "{{ ca_file }}"
@@ -60,7 +54,7 @@
         kube_controller_manager_service_cluster_ip_range: "{{ k8s_service_cluster_ip_range }}"
     - role: kube_scheduler
       vars:
-        kube_scheduler_version: "{{ k8s_control_plane_version }}"
+        kube_scheduler_version: "{{ k8s_version }}"
         kube_scheduler_pki_src_path: "{{ k8s_pki_path }}"
         kube_scheduler_client_ca_file: "{{ ca_file }}"
         kube_scheduler_tls_cert_file: "kube-scheduler.crt"

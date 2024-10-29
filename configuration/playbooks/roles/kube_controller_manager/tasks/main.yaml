@@ -31,7 +31,7 @@
       block:
         - name: Download kube-controller-manager binary
           ansible.builtin.get_url:
-            url: "{{ control_plane_binaries_url }}/kube-controller-manager"
+            url: "{{ k8s_binaries_url }}/kube-controller-manager"
             dest: "{{ kube_controller_manager_target_path }}"
             owner: root
             group: root
