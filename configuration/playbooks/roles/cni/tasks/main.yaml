@@ -79,10 +79,17 @@
 
 - name: Configure cni-plugins
   block:
+    - name: Ensure config path directory exists
+      ansible.builtin.file:
+        path: "{{ cni_plugins_config_path }}"
+        state: directory
+        mode: "0755"
+      become: true
+
     - name: Create bridge config file
       ansible.builtin.template:
         src: 10-bridge.conf.j2
-        dest: "{{ containerd_cni_plugins_config_path }}/10-bridge.conf"
+        dest: "{{ cni_plugins_config_path }}/10-bridge.conf"
         mode: "0600"
       become: true
       notify: Restart containerd service
@@ -90,7 +97,7 @@
     - name: Create loopback config file
       ansible.builtin.copy:
         src: files/99-loopback.conf
-        dest: "{{ containerd_cni_plugins_config_path }}/99-loopback.conf"
+        dest: "{{ cni_plugins_config_path }}/99-loopback.conf"
         remote_src: false
         owner: root
         group: root
