@@ -3,7 +3,7 @@
 set -e
 
 print_usage() {
-  echo "Usage: $(basename $0) <plan|provision|create|destroy>"
+  echo "Usage: $(basename $0) <plan|provision|create|destroy|troubleshoot>"
   exit 1
 }
 
@@ -88,6 +88,11 @@ destroy() {
   run_terraform "destroy"
 }
 
+troubleshoot() {
+  build_configuration_docker_image
+  run_ansible "troubleshoot"
+}
+
 case "$1" in
 plan)
   plan
@@ -100,6 +105,9 @@ create)
   ;;
 destroy)
   destroy
+  ;;
+troubleshoot)
+  troubleshoot
   ;;
 *)
   echo "$(basename $0) - invalid option: $1" >&2
