@@ -19,13 +19,21 @@ module "bastion-security-group-rules" {
       ip_protocol = local.tcp_protocol
       cidr_ipv4   = var.my_ipv4_address
     }
-    "ssh-outbound-traffic" = {
-      description                  = "Allow SSH outbound traffic"
+    "ssh-outbound-traffic-to-control-plane" = {
+      description                  = "Allow SSH outbound traffic to control plane"
       direction                    = "outbound"
       from_port                    = local.ssh_port
       to_port                      = local.ssh_port
       ip_protocol                  = local.tcp_protocol
-      referenced_security_group_id = module.k8s-cluster-security-group.security_group_id
+      referenced_security_group_id = module.k8s-control-plane-security-group.security_group_id
+    }
+    "ssh-outbound-traffic-to-worker-node" = {
+      description                  = "Allow SSH outbound traffic to worker node"
+      direction                    = "outbound"
+      from_port                    = local.ssh_port
+      to_port                      = local.ssh_port
+      ip_protocol                  = local.tcp_protocol
+      referenced_security_group_id = module.k8s-worker-node-security-group.security_group_id
     }
   }
   tag_prefix = local.tag_prefix

@@ -16,6 +16,7 @@
       ansible.builtin.include_tasks: tasks/set_k8s_binaries_url.yaml
 
   roles:
+    # TODO delete
     - role: display_time
     - role: journald
     - role: control_plane_system_configuration

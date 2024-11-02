@@ -50,7 +50,7 @@ EOF
 
 create_cluster() {
   generate_ssh_config_file
-  # ansible-playbook playbooks/k8s-init-control-plane.yaml
+  ansible-playbook playbooks/k8s-init-control-plane.yaml
   ansible-playbook playbooks/k8s-init-worker-node.yaml
 }
 
