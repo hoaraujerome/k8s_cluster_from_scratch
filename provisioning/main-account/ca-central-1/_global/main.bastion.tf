@@ -2,14 +2,14 @@ module "bastion-security-group" {
   source = "../../../modules/network-securitygroup"
 
   vpc_id     = module.vpc.vpc_id
-  name       = "bastion"
+  names      = [local.bastion_component]
   tag_prefix = local.tag_prefix
 }
 
 module "bastion-security-group-rules" {
   source = "../../../modules/network-securitygrouprules"
 
-  security_group_id = module.bastion-security-group.security_group_id
+  security_group_id = module.bastion-security-group.security_group_id[local.bastion_component]
   rules = {
     "ssh-inbound-traffic" = {
       description = "Allow SSH inbound traffic"
@@ -25,7 +25,7 @@ module "bastion-security-group-rules" {
       from_port                    = local.ssh_port
       to_port                      = local.ssh_port
       ip_protocol                  = local.tcp_protocol
-      referenced_security_group_id = module.k8s-control-plane-security-group.security_group_id
+      referenced_security_group_id = module.k8s-security-groups.security_group_id[local.k8s_control_plane_component]
     }
     "ssh-outbound-traffic-to-worker-node" = {
       description                  = "Allow SSH outbound traffic to worker node"
@@ -33,7 +33,7 @@ module "bastion-security-group-rules" {
       from_port                    = local.ssh_port
       to_port                      = local.ssh_port
       ip_protocol                  = local.tcp_protocol
-      referenced_security_group_id = module.k8s-worker-node-security-group.security_group_id
+      referenced_security_group_id = module.k8s-security-groups.security_group_id[local.k8s_worker_node_component]
     }
   }
   tag_prefix = local.tag_prefix
@@ -50,12 +50,12 @@ module "bastion-ec2" {
   source = "../../../modules/compute-ec2"
 
   subnet_id                   = module.vpc.subnet_ids_by_name["${local.tag_prefix}bastion-subnet"]
-  security_group_ids          = [module.bastion-security-group.security_group_id]
+  security_group_ids          = [module.bastion-security-group.security_group_id[local.bastion_component]]
   key_pair_name               = module.bastion-ssh-public-key.key_pair_name
   associate_public_ip_address = true
   tags = {
-    Name = "${local.tag_prefix}bastion"
-    Role = "bastion"
+    Name = "${local.tag_prefix}${local.bastion_component}"
+    Role = local.bastion_component
   }
 }
 

@@ -7,4 +7,7 @@ locals {
   https_port                         = 443
   tcp_protocol                       = "tcp"
   anywhere_ip_v4                     = "0.0.0.0/0"
+  bastion_component                  = "bastion"
+  k8s_worker_node_component          = "k8s-worker-node"
+  k8s_control_plane_component        = "k8s-control-plane"
 }

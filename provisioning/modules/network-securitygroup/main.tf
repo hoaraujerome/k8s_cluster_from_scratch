@@ -1,8 +1,10 @@
 resource "aws_security_group" "this" {
-  name        = var.name
-  description = "${var.name} VPC security group"
+  for_each = var.names
+
+  name        = each.value
+  description = "${each.value} VPC security group"
   vpc_id      = var.vpc_id
   tags = {
-    Name = "${var.tag_prefix}${var.name}-security-group"
+    Name = "${var.tag_prefix}${each.value}-security-group"
   }
 }

@@ -3,9 +3,14 @@ variable "vpc_id" {
   nullable = false
 }
 
-variable "name" {
-  type     = string
+variable "names" {
+  type     = set(string)
   nullable = false
+
+  validation {
+    condition     = length(var.names) > 0
+    error_message = "At least one name must be set"
+  }
 }
 
 variable "tag_prefix" {

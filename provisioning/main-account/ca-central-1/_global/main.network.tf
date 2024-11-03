@@ -5,7 +5,7 @@ module "vpc" {
   vpc_ipv4_cidr_block = local.vpc_ipv4_cidr_block
   subnets = {
     "bastion" = {
-      name            = "bastion"
+      name            = local.bastion_component
       ipv4_cidr_block = local.bastion_subnet_ipv4_cidr_block
     }
     "k8s-cluster" = {

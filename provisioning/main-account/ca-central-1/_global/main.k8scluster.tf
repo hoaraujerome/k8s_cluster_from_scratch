@@ -2,28 +2,18 @@ locals {
   k8s_api_port = 6443
 }
 
-# TODO refactor module so to accept multiple names for the same vpc
-module "k8s-control-plane-security-group" {
+module "k8s-security-groups" {
   source = "../../../modules/network-securitygroup"
 
   vpc_id     = module.vpc.vpc_id
-  name       = "k8s-control-plane"
+  names      = [local.k8s_control_plane_component, local.k8s_worker_node_component]
   tag_prefix = local.tag_prefix
 }
 
-module "k8s-worker-node-security-group" {
-  source = "../../../modules/network-securitygroup"
-
-  vpc_id     = module.vpc.vpc_id
-  name       = "k8s-worker-node"
-  tag_prefix = local.tag_prefix
-}
-
-# TODO avoid duplication for ssh-inbound-traffic + https outbound
 module "k8s-control-plane-security-group-rules" {
   source = "../../../modules/network-securitygrouprules"
 
-  security_group_id = module.k8s-control-plane-security-group.security_group_id
+  security_group_id = module.k8s-security-groups.security_group_id[local.k8s_control_plane_component]
   rules = {
     "ssh-inbound-traffic" = {
       description                  = "Allow SSH inbound traffic from bastion"
@@ -31,7 +21,7 @@ module "k8s-control-plane-security-group-rules" {
       from_port                    = local.ssh_port
       to_port                      = local.ssh_port
       ip_protocol                  = local.tcp_protocol
-      referenced_security_group_id = module.bastion-security-group.security_group_id
+      referenced_security_group_id = module.bastion-security-group.security_group_id[local.bastion_component]
     }
     "k8s-api-inbound-traffic" = {
       description                  = "Allow K8S API inbound traffic from worker node"
@@ -39,7 +29,7 @@ module "k8s-control-plane-security-group-rules" {
       from_port                    = local.k8s_api_port
       to_port                      = local.k8s_api_port
       ip_protocol                  = local.tcp_protocol
-      referenced_security_group_id = module.k8s-worker-node-security-group.security_group_id
+      referenced_security_group_id = module.k8s-security-groups.security_group_id[local.k8s_worker_node_component]
     }
     "https-outbound-traffic" = {
       description = "Allow HTTPS outbound traffic"
@@ -56,7 +46,7 @@ module "k8s-control-plane-security-group-rules" {
 module "k8s-worker-node-security-group-rules" {
   source = "../../../modules/network-securitygrouprules"
 
-  security_group_id = module.k8s-worker-node-security-group.security_group_id
+  security_group_id = module.k8s-security-groups.security_group_id[local.k8s_worker_node_component]
   rules = {
     "ssh-inbound-traffic" = {
       description                  = "Allow SSH inbound traffic from bastion"
@@ -64,7 +54,7 @@ module "k8s-worker-node-security-group-rules" {
       from_port                    = local.ssh_port
       to_port                      = local.ssh_port
       ip_protocol                  = local.tcp_protocol
-      referenced_security_group_id = module.bastion-security-group.security_group_id
+      referenced_security_group_id = module.bastion-security-group.security_group_id[local.bastion_component]
     }
     "https-outbound-traffic" = {
       description = "Allow HTTPS outbound traffic"
@@ -80,7 +70,7 @@ module "k8s-worker-node-security-group-rules" {
       from_port                    = local.k8s_api_port
       to_port                      = local.k8s_api_port
       ip_protocol                  = local.tcp_protocol
-      referenced_security_group_id = module.k8s-control-plane-security-group.security_group_id
+      referenced_security_group_id = module.k8s-security-groups.security_group_id[local.k8s_control_plane_component]
     }
   }
   tag_prefix = local.tag_prefix
@@ -90,12 +80,12 @@ module "k8s-cluster-ec2-control-plane" {
   source = "../../../modules/compute-ec2"
 
   subnet_id                   = module.vpc.subnet_ids_by_name["${local.tag_prefix}k8s-cluster-subnet"]
-  security_group_ids          = [module.k8s-control-plane-security-group.security_group_id]
+  security_group_ids          = [module.k8s-security-groups.security_group_id[local.k8s_control_plane_component]]
   key_pair_name               = module.bastion-ssh-public-key.key_pair_name
   associate_public_ip_address = false
   tags = {
-    Name = "${local.tag_prefix}k8s-control-plane"
-    Role = "k8s-control-plane"
+    Name = "${local.tag_prefix}${local.k8s_control_plane_component}"
+    Role = local.k8s_control_plane_component
   }
 }
 
@@ -103,12 +93,12 @@ module "k8s-cluster-ec2-worker-node" {
   source = "../../../modules/compute-ec2"
 
   subnet_id                   = module.vpc.subnet_ids_by_name["${local.tag_prefix}k8s-cluster-subnet"]
-  security_group_ids          = [module.k8s-worker-node-security-group.security_group_id]
+  security_group_ids          = [module.k8s-security-groups.security_group_id[local.k8s_worker_node_component]]
   key_pair_name               = module.bastion-ssh-public-key.key_pair_name
   associate_public_ip_address = false
   tags = {
-    Name = "${local.tag_prefix}k8s-worker-node"
-    Role = "k8s-worker-node"
+    Name = "${local.tag_prefix}${local.k8s_worker_node_component}"
+    Role = local.k8s_worker_node_component
   }
 }
 
