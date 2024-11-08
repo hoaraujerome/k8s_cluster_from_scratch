@@ -9,7 +9,12 @@
     - name: Include K8S binaries URL setup task
       ansible.builtin.include_tasks: tasks/set_k8s_binaries_url.yaml
 
+    - name: Set control plane private IP
+      ansible.builtin.set_fact:
+        k8s_control_plane_ip: "{{ hostvars[groups['k8s_control_plane'][0]]['private_ip_address']}}"
+
   roles:
+    - role: worker_node_system_configuration
     # TODO move to the end
     - role: kubelet
       vars:
@@ -20,6 +25,5 @@
         kubelet_tls_private_key_file: "node-0.key"
     # TODO delete
     - role: display_time
-    - role: journald
-    - role: worker_node_system_configuration
-    - role: containerd
+    #     - role: journald
+    #     - role: containerd

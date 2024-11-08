@@ -9,3 +9,10 @@
   ansible.builtin.fail:
     msg: "Swap is enabled on the system"
   when: swap_check.stdout != ""
+
+- name: Create DNS aliases
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    state: present
+    line: "{{ k8s_control_plane_ip }} server.kubernetes.local"
+  become: true
