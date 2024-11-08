@@ -1,0 +1,2 @@
+---
+kubectl_config_admin_pki_path: "/var/lib/kubernetes"

@@ -1,33 +1,33 @@
 ---
 - name: Install kubelet binary
   block:
-    # - name: Capture kubelet installed version
-    #   ansible.builtin.command: "{{ kubelet_target_path }}/kubelet --version"
-    #   register: kubelet_installed
-    #   ignore_errors: true
-    #   changed_when: false
+    - name: Capture kubelet installed version
+      ansible.builtin.command: "{{ kubelet_target_path }}/kubelet --version"
+      register: kubelet_installed
+      ignore_errors: true
+      changed_when: false
 
-    # - name: Set kubelet installed version fact
-    #   ansible.builtin.set_fact:
-    #     kubelet_installed_version: "{{ kubelet_installed.stdout_lines[0].split(' ')[1] }}"
-    #   when: kubelet_installed.rc == 0
+    - name: Set kubelet installed version fact
+      ansible.builtin.set_fact:
+        kubelet_installed_version: "{{ kubelet_installed.stdout_lines[0].split(' ')[1] }}"
+      when: kubelet_installed.rc == 0
 
-    # - name: Stop and remove existing kubelet if version mismatch
-    #   when: kubelet_installed.rc == 0 and kubelet_installed_version != kubelet_version
-    #   block:
-    #     - name: Ensure kubelet is stopped
-    #       ansible.builtin.systemd_service:
-    #         name: kubelet
-    #         state: stopped
-    #       become: true
+    - name: Stop and remove existing kubelet if version mismatch
+      when: kubelet_installed.rc == 0 and kubelet_installed_version != kubelet_version
+      block:
+        - name: Ensure kubelet is stopped
+          ansible.builtin.systemd_service:
+            name: kubelet
+            state: stopped
+          become: true
 
-    #     - name: Remove kubelet target directory
-    #       ansible.builtin.file:
-    #         path: "{{ kubelet_target_path }}"
-    #         state: absent
+        - name: Remove kubelet target directory
+          ansible.builtin.file:
+            path: "{{ kubelet_target_path }}"
+            state: absent
 
     - name: Install kubelet binary if not installed or version mismatch
-      #  when: kubelet_installed_version|default('') != kubelet_version
+      when: kubelet_installed_version|default('') != kubelet_version
       block:
         - name: Download kubelet binary
           ansible.builtin.get_url:
@@ -60,64 +60,65 @@
         - "{{ kubelet_tls_cert_file }}"
         - "{{ kubelet_tls_private_key_file }}"
       become: true
-      # notify: Restart kubelet service
-# TODO https://server.kubernetes.local:6443 not reachable from worker node
-# - name: Setup Kubelet Configuration
-#   block:
-#     - name: Generate kubelet kubeconfig
-#       ansible.builtin.include_role:
-#         name: kubectl_config
-#       vars:
-#         kubectl_config_server: "https://server.kubernetes.local:6443"
-#         kubectl_config_ca_path: "{{ kubectl_pki_path }}/{{ kubelet_client_ca_file }}"
-#         kubectl_config_user: "{{ kubelet_name }}"
-#         kubectl_config_client_certificate_path: "{{ kubectl_pki_path }}/{{ kubelet_tls_cert_file }}"
-#         kubectl_config_client_key_path: "{{ kubectl_pki_path }}/{{ kubelet_tls_private_key_file }}"
-#
-#     - name: Ensure scheduler config directory exists
-#       ansible.builtin.file:
-#         path: "{{ kubelet_config_path }}"
-#         state: directory
-#         mode: "0755"
-#       become: true
-#
-#     - name: Generate scheduler configuration manifest
-#       ansible.builtin.template:
-#         src: kubelet-configuration.yaml.j2
-#         dest: "{{ kubelet_config_path }}/{{ kubelet_name }}.yaml"
-#         mode: "0644"
-#       become: true
-#
-# - name: Install and configure kubelet service
-#   block:
-#     - name: Ensure service env directory exists
-#       ansible.builtin.file:
-#         path: "{{ kubelet_service_env_path }}"
-#         state: directory
-#         mode: "0755"
-#       become: true
-#
-#     - name: Create service environment file
-#       ansible.builtin.template:
-#         src: kubelet.env.j2
-#         dest: "{{ kubelet_service_env_path }}/kubelet"
-#         mode: "0644"
-#       become: true
-#       notify: Restart kubelet service
-#
-#     - name: Create systemd service file
-#       ansible.builtin.template:
-#         src: kubelet.service.j2
-#         dest: /lib/systemd/system/kubelet.service
-#         mode: "0644"
-#       become: true
-#       notify: Restart kubelet service
-#
-# - name: Trigger handler immediately after service configuration
-#   ansible.builtin.meta: flush_handlers
-#
-# - name: Wait for kubelet port to become available
-#   ansible.builtin.wait_for:
-#     host: localhost
-#     port: 10259
-#     timeout: 30
+      notify: Restart kubelet service
+
+- name: Setup Kubelet Configuration
+  block:
+    - name: Generate kubelet kubeconfig
+      ansible.builtin.include_role:
+        name: kubectl_config
+      vars:
+        kubectl_config_server: "https://server.kubernetes.local:6443"
+        kubectl_config_ca_path: "{{ kubelet_pki_path }}/{{ kubelet_client_ca_file }}"
+        kubectl_config_user: "system:node:node-0"
+        kubectl_config_client_certificate_path: "{{ kubelet_pki_path }}/{{ kubelet_tls_cert_file }}"
+        kubectl_config_client_key_path: "{{ kubelet_pki_path }}/{{ kubelet_tls_private_key_file }}"
+        kubectl_config_name: "{{ kubelet_name }}"
+
+    - name: Ensure kubelet config directory exists
+      ansible.builtin.file:
+        path: "{{ kubelet_config_path }}"
+        state: directory
+        mode: "0755"
+      become: true
+
+    - name: Generate kubelet configuration manifest
+      ansible.builtin.template:
+        src: kubelet-configuration.yaml.j2
+        dest: "{{ kubelet_config_path }}/{{ kubelet_name }}.yaml"
+        mode: "0644"
+      become: true
+
+- name: Install and configure kubelet service
+  block:
+    - name: Ensure service env directory exists
+      ansible.builtin.file:
+        path: "{{ kubelet_service_env_path }}"
+        state: directory
+        mode: "0755"
+      become: true
+
+    - name: Create service environment file
+      ansible.builtin.template:
+        src: kubelet.env.j2
+        dest: "{{ kubelet_service_env_path }}/kubelet"
+        mode: "0644"
+      become: true
+      notify: Restart kubelet service
+
+    - name: Create systemd service file
+      ansible.builtin.template:
+        src: kubelet.service.j2
+        dest: /lib/systemd/system/kubelet.service
+        mode: "0644"
+      become: true
+      notify: Restart kubelet service
+
+- name: Trigger handler immediately after service configuration
+  ansible.builtin.meta: flush_handlers
+
+- name: Wait for kubelet port to become available
+  ansible.builtin.wait_for:
+    host: localhost
+    port: 10250
+    timeout: 30

@@ -1,3 +1,2 @@
 ---
 kubectl_target_path: "/usr/local/bin"
-kubectl_pki_path: "/var/lib/kubernetes"

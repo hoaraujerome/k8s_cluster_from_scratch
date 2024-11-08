@@ -15,6 +15,9 @@
 
   roles:
     - role: worker_node_system_configuration
+    - role: kubectl
+      vars:
+        kubectl_version: "{{ k8s_version }}"
     # TODO move to the end
     - role: kubelet
       vars:

@@ -1,7 +1,6 @@
 ---
-# TODO to review
 kubelet_target_path: "/usr/local/bin"
 kubelet_pki_path: "/var/lib/kubernetes"
 kubelet_service_env_path: "/etc/default"
 kubelet_config_path: "/etc/kubernetes/config"
-kubelet_name: "kube-scheduler"
+kubelet_name: "kubelet"

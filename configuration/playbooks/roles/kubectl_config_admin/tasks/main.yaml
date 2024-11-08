@@ -1,0 +1,34 @@
+---
+- name: Setup PKI
+  block:
+    - name: Ensure PKI directory exists
+      ansible.builtin.file:
+        path: "{{ kubectl_config_admin_pki_path }}"
+        state: directory
+        mode: "0700"
+      become: true
+
+    - name: Copy certs and keys to target directory
+      ansible.builtin.copy:
+        src: "{{ kubectl_config_admin_pki_src_path }}/{{ item }}"
+        dest: "{{ kubectl_config_admin_pki_path }}"
+        remote_src: false
+        owner: root
+        group: root
+        mode: "0600"
+      loop:
+        - "{{ kubectl_config_admin_ca_file }}"
+        - "{{ kubectl_config_admin_admin_tls_cert_file }}"
+        - "{{ kubectl_config_admin_admin_tls_private_key_file }}"
+      become: true
+
+- name: Generate Admin kubeconfig
+  ansible.builtin.include_role:
+    name: kubectl_config
+  vars:
+    kubectl_config_server: "https://127.0.0.1:6443"
+    kubectl_config_ca_path: "{{ kubectl_config_admin_pki_path }}/{{ kubectl_config_admin_ca_file }}"
+    kubectl_config_user: "admin"
+    kubectl_config_client_certificate_path: "{{ kubectl_config_admin_pki_path }}/{{ kubectl_config_admin_admin_tls_cert_file }}"
+    kubectl_config_client_key_path: "{{ kubectl_config_admin_pki_path }}/{{ kubectl_config_admin_admin_tls_private_key_file }}"
+    kubectl_config_name: "admin"

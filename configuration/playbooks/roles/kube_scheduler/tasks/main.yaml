@@ -69,10 +69,11 @@
         name: kubectl_config
       vars:
         kubectl_config_server: "https://server.kubernetes.local:6443"
-        kubectl_config_ca_path: "{{ kubectl_pki_path }}/{{ kube_scheduler_client_ca_file }}"
+        kubectl_config_ca_path: "{{ kube_scheduler_pki_path }}/{{ kube_scheduler_client_ca_file }}"
         kubectl_config_user: "{{ kube_scheduler_name }}"
-        kubectl_config_client_certificate_path: "{{ kubectl_pki_path }}/{{ kube_scheduler_tls_cert_file }}"
-        kubectl_config_client_key_path: "{{ kubectl_pki_path }}/{{ kube_scheduler_tls_private_key_file }}"
+        kubectl_config_client_certificate_path: "{{ kube_scheduler_pki_path }}/{{ kube_scheduler_tls_cert_file }}"
+        kubectl_config_client_key_path: "{{ kube_scheduler_pki_path }}/{{ kube_scheduler_tls_private_key_file }}"
+        kubectl_config_name: "{{ kube_scheduler_name }}"
 
     - name: Ensure scheduler config directory exists
       ansible.builtin.file:
