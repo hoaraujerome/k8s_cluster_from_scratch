@@ -7,7 +7,7 @@ kube_apiserver_service_env_path: "/etc/default"
 # kube-apiserver options
 # ***
 kube_apiserver_service_account_issuer: "https://kubernetes.default.svc"
-kube_apiserver_auth_modes: "RBAC"
+kube_apiserver_auth_modes: "Node,RBAC"
 kube_apiserver_audit_log:
   maxage: 30
   maxbackup: 3

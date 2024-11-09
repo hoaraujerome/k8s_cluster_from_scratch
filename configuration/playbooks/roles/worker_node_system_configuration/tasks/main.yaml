@@ -10,7 +10,20 @@
     msg: "Swap is enabled on the system"
   when: swap_check.stdout != ""
 
-- name: Create DNS aliases
+- name: Set the hostname
+  ansible.builtin.hostname:
+    name: node-0
+  become: true
+
+- name: Update /etc/hosts with the new hostname
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    state: present
+    regexp: '^127.0.0.1'
+    line: "127.0.0.1 {{ ansible_hostname }} localhost {{ ansible_hostname }}.kubernetes.local"
+  become: true
+
+- name: Create K8S API server DNS alias
   ansible.builtin.lineinfile:
     path: /etc/hosts
     state: present

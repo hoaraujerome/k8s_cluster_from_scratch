@@ -2,5 +2,7 @@
 k8s_pki_path: /home/ansible/.k8s
 ca_file: ca.crt
 k8s_version: "v1.31.1"
+kubelet_client_certificate_file: "node-0.crt"
+kubelet_client_key_file: "node-0.key"
 # Should NOT overlap AWS subnets
 pods_cidr_range: "10.200.0.0/16"

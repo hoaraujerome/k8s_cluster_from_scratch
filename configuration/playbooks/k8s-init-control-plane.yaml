@@ -16,8 +16,6 @@
       ansible.builtin.include_tasks: tasks/set_k8s_binaries_url.yaml
 
   roles:
-    # TODO delete
-    - role: display_time
     - role: journald
     - role: control_plane_system_configuration
     - role: etcd
@@ -34,6 +32,9 @@
         kube_apiserver_tls_cert_file: "kube-api-server.crt"
         kube_apiserver_tls_private_key_file: "kube-api-server.key"
         kube_apiserver_service_cluster_ip_range: "{{ k8s_service_cluster_ip_range }}"
+        kube_apiserver_kubelet_ca_file: "{{ ca_file }}"
+        kube_apiserver_kubelet_client_certificate_file: "{{ kubelet_client_certificate_file }}"
+        kube_apiserver_kubelet_client_key_file: "{{ kubelet_client_key_file }}"
     - role: kubectl
       vars:
         kubectl_version: "{{ k8s_version }}"

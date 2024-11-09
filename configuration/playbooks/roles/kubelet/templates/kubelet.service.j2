@@ -2,7 +2,8 @@
 Description=kubelet service
 Documentation=https://github.com/kubernetes/kubernetes
 After=containerd.service
-Requires=containerd.service
+# TODO if requires enabled for some reasons kubelet starting is not working even tho containerd seems up and running
+# Requires=containerd.service
 
 [Service]
 EnvironmentFile={{ kubelet_service_env_path }}/kubelet
