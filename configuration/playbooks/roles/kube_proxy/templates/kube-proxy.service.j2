@@ -1,0 +1,14 @@
+[Unit]
+Description=kube-proxy service
+Documentation=https://github.com/kubernetes/kubernetes
+After=network.target
+
+[Service]
+EnvironmentFile={{ kube_proxy_service_env_path }}/kube_proxy
+ExecStart={{ kube_proxy_target_path }}/kube-proxy $DAEMON_OPTS
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+Alias=kube-proxy.service

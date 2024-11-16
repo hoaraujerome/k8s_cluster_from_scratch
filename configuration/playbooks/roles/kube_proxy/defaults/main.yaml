@@ -1,0 +1,6 @@
+---
+kube_proxy_target_path: "/usr/local/bin"
+kube_proxy_pki_path: "/var/lib/kubernetes"
+kube_proxy_service_env_path: "/etc/default"
+kube_proxy_config_path: "/etc/kubernetes/config"
+kube_proxy_name: "kube-proxy"

@@ -27,3 +27,10 @@
         kubelet_client_ca_file: "{{ ca_file }}"
         kubelet_tls_cert_file: "{{ kubelet_client_certificate_file }}"
         kubelet_tls_private_key_file: "{{ kubelet_client_key_file }}"
+    - role: kube_proxy
+      vars:
+        kube_proxy_version: "{{ k8s_version }}"
+        kube_proxy_pki_src_path: "{{ k8s_pki_path }}"
+        kube_proxy_client_ca_file: "{{ ca_file }}"
+        kube_proxy_tls_cert_file: "kube-proxy.crt"
+        kube_proxy_tls_private_key_file: "kube-proxy.key"

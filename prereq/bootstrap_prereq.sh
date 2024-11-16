@@ -16,6 +16,7 @@ certs=(
   "admin"
   "kube-scheduler"
   "node-0"
+  "kube-proxy"
 )
 
 setup_ssh_key() {

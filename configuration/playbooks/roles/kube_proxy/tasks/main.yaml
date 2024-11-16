@@ -1,0 +1,128 @@
+---
+- name: Install kube-proxy binary
+  block:
+    - name: Capture kube-proxy installed version
+      ansible.builtin.command: "{{ kube_proxy_target_path }}/kube-proxy --version"
+      register: kube_proxy_installed
+      ignore_errors: true
+      changed_when: false
+
+    - name: Set kube-proxy installed version fact
+      ansible.builtin.set_fact:
+        kube_proxy_installed_version: "{{ kube_proxy_installed.stdout_lines[0].split(' ')[1] }}"
+      when: kube_proxy_installed.rc == 0
+
+    - name: Display kube-proxy version
+      ansible.builtin.debug:
+        msg: "Kube-proxy version: {{ kube_proxy_installed_version }}"
+
+    - name: Stop and remove existing kube-proxy if version mismatch
+      when: kube_proxy_installed.rc == 0 and kube_proxy_installed_version != kube_proxy_version
+      block:
+        - name: Ensure kube-proxy is stopped
+          ansible.builtin.systemd_service:
+            name: kube-proxy
+            state: stopped
+          become: true
+
+        - name: Remove kube-proxy target directory
+          ansible.builtin.file:
+            path: "{{ kube_proxy_target_path }}"
+            state: absent
+
+    - name: Install kube-proxy binary if not installed or version mismatch
+      when: kube_proxy_installed_version|default('') != kube_proxy_version
+      block:
+        - name: Download kube-proxy binary
+          ansible.builtin.get_url:
+            url: "{{ k8s_binaries_url }}/kube-proxy"
+            dest: "{{ kube_proxy_target_path }}"
+            owner: root
+            group: root
+            mode: "0755"
+          become: true
+
+- name: Setup PKI
+  block:
+    - name: Ensure PKI directory exists
+      ansible.builtin.file:
+        path: "{{ kube_proxy_pki_path }}"
+        state: directory
+        mode: "0700"
+      become: true
+
+    - name: Copy certs and keys to target directory
+      ansible.builtin.copy:
+        src: "{{ kube_proxy_pki_src_path }}/{{ item }}"
+        dest: "{{ kube_proxy_pki_path }}"
+        remote_src: false
+        owner: root
+        group: root
+        mode: "0600"
+      loop:
+        - "{{ kube_proxy_client_ca_file }}"
+        - "{{ kube_proxy_tls_cert_file }}"
+        - "{{ kube_proxy_tls_private_key_file }}"
+      become: true
+      notify: Restart kube-proxy service
+
+- name: Setup kube-proxy Configuration
+  block:
+    - name: Generate kube-proxy kubeconfig
+      ansible.builtin.include_role:
+        name: kubectl_config
+      vars:
+        kubectl_config_server: "https://server.kubernetes.local:6443"
+        kubectl_config_ca_path: "{{ kube_proxy_pki_path }}/{{ kube_proxy_client_ca_file }}"
+        kubectl_config_user: "{{ kube_proxy_name }}"
+        kubectl_config_client_certificate_path: "{{ kube_proxy_pki_path }}/{{ kube_proxy_tls_cert_file }}"
+        kubectl_config_client_key_path: "{{ kube_proxy_pki_path }}/{{ kube_proxy_tls_private_key_file }}"
+        kubectl_config_name: "{{ kube_proxy_name }}"
+
+    - name: Ensure kube-proxy config directory exists
+      ansible.builtin.file:
+        path: "{{ kube_proxy_config_path }}"
+        state: directory
+        mode: "0755"
+      become: true
+
+    - name: Generate kube-proxy configuration manifest
+      ansible.builtin.template:
+        src: kube-proxy-configuration.yaml.j2
+        dest: "{{ kube_proxy_config_path }}/{{ kube_proxy_name }}.yaml"
+        mode: "0644"
+      become: true
+
+- name: Install and configure kube-proxy service
+  block:
+    - name: Ensure service env directory exists
+      ansible.builtin.file:
+        path: "{{ kube_proxy_service_env_path }}"
+        state: directory
+        mode: "0755"
+      become: true
+
+    - name: Create service environment file
+      ansible.builtin.template:
+        src: kube-proxy.env.j2
+        dest: "{{ kube_proxy_service_env_path }}/kube_proxy"
+        mode: "0644"
+      become: true
+      notify: Restart kube-proxy service
+
+    - name: Create systemd service file
+      ansible.builtin.template:
+        src: kube-proxy.service.j2
+        dest: /lib/systemd/system/kube-proxy.service
+        mode: "0644"
+      become: true
+      notify: Restart kube-proxy service
+
+- name: Trigger handler immediately after service configuration
+  ansible.builtin.meta: flush_handlers
+
+- name: Wait for kube-proxy port to become available
+  ansible.builtin.wait_for:
+    host: localhost
+    port: 10256
+    timeout: 30
