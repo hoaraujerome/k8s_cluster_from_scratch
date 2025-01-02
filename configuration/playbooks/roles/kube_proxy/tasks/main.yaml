@@ -12,10 +12,6 @@
         kube_proxy_installed_version: "{{ kube_proxy_installed.stdout_lines[0].split(' ')[1] }}"
       when: kube_proxy_installed.rc == 0
 
-    - name: Display kube-proxy version
-      ansible.builtin.debug:
-        msg: "Kube-proxy version: {{ kube_proxy_installed_version }}"
-
     - name: Stop and remove existing kube-proxy if version mismatch
       when: kube_proxy_installed.rc == 0 and kube_proxy_installed_version != kube_proxy_version
       block:
