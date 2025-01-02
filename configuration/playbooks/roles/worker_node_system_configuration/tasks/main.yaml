@@ -12,7 +12,7 @@
 
 - name: Set the hostname
   ansible.builtin.hostname:
-    name: node-0
+    name: "{{ worker_node_hostname }}"
   become: true
 
 - name: Update /etc/hosts with the new hostname

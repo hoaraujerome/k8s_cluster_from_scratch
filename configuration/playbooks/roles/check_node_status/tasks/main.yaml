@@ -1,0 +1,23 @@
+---
+- name: Wait for a few seconds before checking node status
+  pause:
+    seconds: 10
+
+- name: Get node status
+  command: kubectl get nodes --kubeconfig /root/kubelet.kubeconfig -o json
+  register: node_status
+  become: true
+
+- name: Parse node status
+  set_fact:
+    nodes: "{{ node_status.stdout | from_json }}"
+
+- name: Ensure worker node is ready
+  fail:
+    msg: "{{ worker_node_hostname }} is not ready"
+  when: >
+    item['metadata']['name'] == worker_node_hostname and
+    item['status']['conditions'] | selectattr('type', 'equalto', 'Ready') | selectattr('status', 'equalto', 'True') | list | length == 0
+  with_items: "{{ nodes['items'] }}"
+  loop_control:
+    label: "{{ item['metadata']['name'] }}"

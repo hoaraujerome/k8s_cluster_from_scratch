@@ -13,6 +13,10 @@
       ansible.builtin.set_fact:
         k8s_control_plane_ip: "{{ hostvars[groups['k8s_control_plane'][0]]['private_ip_address'] }}"
 
+    - name: Set worker node hostname
+      ansible.builtin.set_fact:
+        worker_node_hostname: "node-0"
+
   roles:
     - role: journald
     - role: worker_node_system_configuration
@@ -34,3 +38,4 @@
         kube_proxy_client_ca_file: "{{ ca_file }}"
         kube_proxy_tls_cert_file: "kube-proxy.crt"
         kube_proxy_tls_private_key_file: "kube-proxy.key"
+    - role: check_node_status
