@@ -15,6 +15,10 @@
     - name: Include K8S binaries URL setup task
       ansible.builtin.include_tasks: tasks/set_k8s_binaries_url.yaml
 
+    - name: Set worker node private IP
+      ansible.builtin.set_fact:
+        k8s_worker_node_ip: "{{ hostvars[groups['k8s_worker_node'][0]]['private_ip_address'] }}"
+
   roles:
     - role: journald
     - role: control_plane_system_configuration

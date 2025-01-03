@@ -5,3 +5,42 @@
     state: present
     line: "{{ ansible_default_ipv4.address | default(ansible_all_ipv4_addresses[0]) }} server server.kubernetes.local"
   become: true
+
+# Add a static route to worker node
+- name: Get network interface name
+  ansible.builtin.shell: |
+    ip -o link show | awk -F': ' '{print $2}' | grep -E 'ens|eth'
+  register: interface_name
+
+- name: Get MAC address
+  command: cat /sys/class/net/ens5/address
+  register: mac_address
+
+- name: Disable cloud-init network configuration
+  copy:
+    dest: /etc/cloud/cloud.cfg.d/99-disable-network-config.cfg
+    content: |
+      network: {config: disabled}
+  become: true
+
+- name: Create new Netplan configuration file
+  copy:
+    dest: /etc/netplan/01-netcfg.yaml
+    content: |
+      network:
+        version: 2
+        ethernets:
+          {{ interface_name.stdout }}:
+            match:
+              macaddress: {{ mac_address.stdout }}
+            dhcp4: true
+            dhcp6: false
+            set-name: {{ interface_name.stdout }}
+            routes:
+              - to: {{ pods_cidr_range }}
+                via: {{ k8s_worker_node_ip }}
+  become: true
+
+- name: Apply Netplan configuration
+  command: "netplan apply"
+  become: true
