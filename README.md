@@ -99,6 +99,26 @@ Host k8s-hard-way-control-plane
 
 This project is a personal learning endeavor, and contributions are not being accepted at this time.
 
+## Developer Setup
+
+**WIP**
+
+### Requirements
+
+- [pre-commit](https://pre-commit.com/)
+
+### Steps
+
+1. Clone this repo and cd
+2. Install `pre-commit` hooks:
+   ```sh
+   pre-commit install
+   ```
+3. (Optional) Run pre-commit on all files:
+   ```sh
+   pre-commit run --all-files
+   ```
+
 ## Authors and Acknowledgment
 
 - **Hoarau Jerome** - [GitHub](https://github.com/hoaraujerome)
