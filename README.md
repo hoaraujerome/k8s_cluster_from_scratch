@@ -14,11 +14,11 @@
 
 ### Infrastructure
 
-![image](https://github.com/user-attachments/assets/5dade7ac-d416-48c1-acfe-ae3330d97e69)
+![K8S_Infra_Deployment_Diagram](https://github.com/user-attachments/assets/cd9dc464-9076-40ab-937f-f4d61544c151)
 
 ### K8S Cluster
 
-**WIP**
+![K8S_Cluster_Deployment_Diagram](https://github.com/user-attachments/assets/461c13b2-5733-4e94-9fe5-503efe222433)
 
 ## Installation
 
