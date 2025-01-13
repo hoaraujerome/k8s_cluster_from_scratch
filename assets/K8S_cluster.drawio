@@ -1,0 +1,54 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36" version="26.0.5" pages="2">
+  <diagram name="Page-1" id="c4acf3e9-155e-7222-9cf6-157b1a14988f">
+    <mxGraphModel dx="2074" dy="1145" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" background="none" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+      </root>
+    </mxGraphModel>
+  </diagram>
+  <diagram id="j1X-eAvDt8CTZ1SDDT0n" name="Page-2">
+    <mxGraphModel dx="1562" dy="881" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="9mZy5AXEd6ZlT_z5ThXT-1" value="&lt;div&gt;&amp;lt;&amp;lt;node&amp;gt;&amp;gt;&lt;/div&gt;Control Plane&lt;div&gt;{OS: Ubuntu 22.04}&lt;/div&gt;" style="verticalAlign=top;align=center;spacingTop=8;spacingLeft=2;spacingRight=12;shape=cube;size=10;direction=south;fontStyle=4;html=1;whiteSpace=wrap;fillColor=#E6D0DE;" vertex="1" parent="1">
+          <mxGeometry x="129" y="413" width="263" height="393" as="geometry" />
+        </mxCell>
+        <mxCell id="9mZy5AXEd6ZlT_z5ThXT-2" value="etcd" style="html=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="179" y="499" width="143" height="41" as="geometry" />
+        </mxCell>
+        <mxCell id="9mZy5AXEd6ZlT_z5ThXT-3" value="kube-apiserver" style="html=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="180" y="565" width="142" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="9mZy5AXEd6ZlT_z5ThXT-4" value="&lt;div&gt;kube-controller-manager&lt;/div&gt;" style="html=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="179" y="644" width="145" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="9mZy5AXEd6ZlT_z5ThXT-5" value="kube-scheduler" style="html=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="177" y="723" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="9mZy5AXEd6ZlT_z5ThXT-7" value="&lt;div&gt;&amp;lt;&amp;lt;node&amp;gt;&amp;gt;&lt;/div&gt;Worker&lt;div&gt;{OS: Ubuntu 22.04}&lt;/div&gt;" style="verticalAlign=top;align=center;spacingTop=8;spacingLeft=2;spacingRight=12;shape=cube;size=10;direction=south;fontStyle=4;html=1;whiteSpace=wrap;fillColor=#9AC7BF;" vertex="1" parent="1">
+          <mxGeometry x="515" y="410" width="263" height="393" as="geometry" />
+        </mxCell>
+        <mxCell id="9mZy5AXEd6ZlT_z5ThXT-8" value="containerd" style="html=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="574" y="578" width="143" height="41" as="geometry" />
+        </mxCell>
+        <mxCell id="9mZy5AXEd6ZlT_z5ThXT-9" value="kubelet" style="html=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="575" y="652" width="142" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="9mZy5AXEd6ZlT_z5ThXT-10" value="&lt;div&gt;kube-proxy&lt;/div&gt;" style="html=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="575" y="730" width="145" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="9mZy5AXEd6ZlT_z5ThXT-11" value="CNI host-local plugin" style="html=1;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="573" y="503" width="144" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="9mZy5AXEd6ZlT_z5ThXT-13" value="" style="endArrow=none;html=1;rounded=0;entryX=0;entryY=0;entryDx=201.5;entryDy=263;entryPerimeter=0;" edge="1" parent="1" source="9mZy5AXEd6ZlT_z5ThXT-1" target="9mZy5AXEd6ZlT_z5ThXT-7">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="503" y="521" as="sourcePoint" />
+            <mxPoint x="553" y="471" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
