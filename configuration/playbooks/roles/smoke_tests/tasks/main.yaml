@@ -1,0 +1,36 @@
+---
+- name: Create Generic Secret
+  ansible.builtin.command: >
+    kubectl create secret generic kubernetes-the-hard-way
+    --from-literal="mykey=mydata"
+    --kubeconfig /root/admin.kubeconfig
+  changed_when: false
+  become: true
+
+- name: Create nginx Deployment
+  ansible.builtin.command: >
+    kubectl create deployment nginx
+    --image=nginx:latest
+    --kubeconfig /root/admin.kubeconfig
+  changed_when: false
+  become: true
+
+- name: Wait for a few seconds before checking nginx pod status
+  ansible.builtin.pause:
+    seconds: 5
+
+- name: Check if nginx pod is running
+  ansible.builtin.command: >
+    kubectl get pods -l app=nginx -o jsonpath='{.items[0].metadata.name} {.items[0].status.phase}'
+    --kubeconfig /root/admin.kubeconfig
+  changed_when: false
+  register: pod_info
+  become: true
+
+- name: Assert nginx pod is running
+  ansible.builtin.assert:
+    that:
+      - "'Running' in pod_info.stdout.split()[-1]"
+    fail_msg: "The nginx pod is not in running state!"
+    success_msg: "The nginx pod is running."
+  become: true

@@ -1,0 +1,11 @@
+---
+- name: Smoke tests
+  hosts: k8s_control_plane
+
+  pre_tasks:
+    - name: Set worker node hostname
+      ansible.builtin.set_fact:
+        worker_node_hostname: "node-0"
+
+  roles:
+    - role: smoke_tests
