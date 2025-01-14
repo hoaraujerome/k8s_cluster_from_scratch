@@ -6,7 +6,7 @@
 
 ## Badges
 
-![Work In Progress](https://img.shields.io/badge/status-work_in_progress-yellow)
+![Completed](https://img.shields.io/badge/status-completed-brightgreen)
 [![Powered by LazyVim](https://img.shields.io/badge/Powered_by-LazyVim-%2307a6c3?style=flat&logo=vim&logoColor=white)](https://lazyvim.org/)
 [![License: CC BY-NC-SA 4.0](https://img.shields.io/badge/License-CC%20BY--NC--SA%204.0-lightgrey.svg)](http://creativecommons.org/licenses/by-nc-sa/4.0/)
 
@@ -90,53 +90,41 @@ graph TD;
 ```mermaid
 graph TD;
     A["Control Plane Playbook"] --> B["Worker Node Playbook"];
+    B --> C["Smoke Tests Playbook"];
 ```
 
-4. Destroy the infrastructure:
+4. Delete the cluster and the infrastructure:
    ```sh
    ./k8s_manager.sh destroy
    ```
 
 ## Usage
 
-### Infrastructure
+* SSH to the control plane
+
    ```sh
-   # Update ~/.ssh/config to simplify ssh command
-   [...]
-Host k8s-hard-way-bastion
-     HostName <bastion_public_dns>
-     User ubuntu
-     IdentityFile ~/.ssh/id_rsa_k8s_the_hard_way
-     StrictHostKeyChecking no
-
-Host k8s-hard-way-control-plane
-     HostName <control_plane_private_dns>
-     User ubuntu
-     ProxyJump k8s-hard-way-bastion
-     IdentityFile ~/.ssh/id_rsa_k8s_the_hard_way
-     StrictHostKeyChecking no
-
-   [...]
-   # SSH to the control plane
-   ssh k8s-hard-way-control-plane
+   ./k8s_manager.sh troubleshoot
+   ssh k8s_control_plane
+   kubectl get secrets --kubeconfig=admin.kubeconfig
+   NAME                      TYPE     DATA   AGE
+   kubernetes-the-hard-way   Opaque   1      75s
    ```
 
-### K8S Cluster
+* SSH to the worker node
 
-**WIP**
-
-## Roadmap
-
-- Implement high availability for the Kubernetes cluster
-- Develop a hub-and-spoke network topology
+   ```sh
+   ./k8s_manager.sh troubleshoot
+   ssh k8s_worker_node
+   kubectl get nodes --kubeconfig=kubelet.kubeconfig
+   NAME     STATUS   ROLES    AGE     VERSION
+   node-0   Ready    <none>   5m27s   v1.31.1
+   ```
 
 ## Contributing
 
 This project is a personal learning endeavor, and contributions are not being accepted at this time.
 
 ## Developer Setup
-
-**WIP**
 
 ### Requirements
 
@@ -166,4 +154,4 @@ This project is licensed under the Creative Commons Attribution-NonCommercial-Sh
 
 ## Project Status
 
-This project is a work in progress and is actively maintained.
+This project is **done** and has been completed successfully as a learning project. It is no longer maintained.
