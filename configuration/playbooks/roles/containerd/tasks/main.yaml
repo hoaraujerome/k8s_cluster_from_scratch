@@ -1,4 +1,12 @@
 ---
+- name: Install runc
+  block:
+    - name: Install runc
+      ansible.builtin.package:
+        name: runc
+        state: present
+      become: true
+
 - name: Install CNI plugins
   ansible.builtin.include_role:
     name: cni
