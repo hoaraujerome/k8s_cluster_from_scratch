@@ -25,16 +25,44 @@
 ### Requirements
 
 - AWS Account
-- AWS CLI
+- AWS CLI configured
 - Docker
-- ... **WIP** ...
 
 ### Steps
 
-1. Setup infrastructure prerequisites (S3 Terraform backend, IAM user & policy, PKI, ...):
+1. Setup prerequisites:
    ```sh
    ./provisioning/prereq/bootstrap_prereq.sh
    ```
+```mermaid
+graph TD
+    root[Bootstrap Prerequisites]
+    crypto_assets[Crypto Assets]
+    terraform_backend[Terraform Backend]
+    terraform_sp[Terraform Service Principal]
+
+    root --> crypto_assets
+    root --> terraform_backend
+    root --> terraform_sp
+
+    crypto_assets --> setup_root_ca[Self-Signed Root CA]
+    crypto_assets --> setup_ssh_key[RSA SSH Key]
+
+    setup_root_ca --> create_sa_certificate[Service Accounts Certificate]
+    create_sa_certificate --> create_apiserver_certificate[kube-apiserver Certificate]
+    create_apiserver_certificate --> create_controllermanager_certificate[kube-controller-manager Certificate]
+    create_controllermanager_certificate --> create_admin_certificate[admin Certificate]
+    create_admin_certificate --> create_scheduler_certificate[kube-scheduler Certificate]
+    create_scheduler_certificate --> create_kubelet_certificate[Kubelet Certificate]
+    create_kubelet_certificate --> create_proxy_certificate[kube-proxy Certificate]
+
+    terraform_backend --> create_s3_bucket[S3 Bucket]
+
+    terraform_sp --> create_iam_user[IAM User]
+    terraform_sp --> create_iam_policy[IAM Policy]
+    create_iam_user --> attach_iam_user_policy[Attach Policy to User]
+    create_iam_policy --> attach_iam_user_policy[Attach Policy to User]
+```
 
 2. Provision the infrastructure with Terraform:
    ```sh
@@ -55,7 +83,14 @@ graph TD;
     F --> G["End-to-end test (root module)"];
 ```
 
-3. Configure the Kubernetes cluster with Ansible: **WIP**
+3. Create the Kubernetes cluster with Ansible:
+   ```sh
+   ./k8s_manager.sh create
+   ```
+```mermaid
+graph TD;
+    A["Control Plane Playbook"] --> B["Worker Node Playbook"];
+```
 
 4. Destroy the infrastructure:
    ```sh
