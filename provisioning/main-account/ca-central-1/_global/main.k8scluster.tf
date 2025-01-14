@@ -1,5 +1,7 @@
 locals {
   k8s_api_port = 6443
+  http_port    = 80
+  https_port   = 443
 }
 
 module "k8s-security-groups" {
@@ -31,6 +33,14 @@ module "k8s-control-plane-security-group-rules" {
       ip_protocol                  = local.tcp_protocol
       referenced_security_group_id = module.k8s-security-groups.security_group_id[local.k8s_worker_node_component]
     }
+    "http-outbound-traffic" = {
+      description = "Allow HTTP outbound traffic"
+      direction   = "outbound"
+      from_port   = local.http_port
+      to_port     = local.http_port
+      ip_protocol = local.tcp_protocol
+      cidr_ipv4   = local.anywhere_ip_v4
+    }
     "https-outbound-traffic" = {
       description = "Allow HTTPS outbound traffic"
       direction   = "outbound"
@@ -55,6 +65,14 @@ module "k8s-worker-node-security-group-rules" {
       to_port                      = local.ssh_port
       ip_protocol                  = local.tcp_protocol
       referenced_security_group_id = module.bastion-security-group.security_group_id[local.bastion_component]
+    }
+    "http-outbound-traffic" = {
+      description = "Allow HTTP outbound traffic"
+      direction   = "outbound"
+      from_port   = local.http_port
+      to_port     = local.http_port
+      ip_protocol = local.tcp_protocol
+      cidr_ipv4   = local.anywhere_ip_v4
     }
     "https-outbound-traffic" = {
       description = "Allow HTTPS outbound traffic"
