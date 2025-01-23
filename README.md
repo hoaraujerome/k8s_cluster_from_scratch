@@ -20,6 +20,8 @@
 
 ![K8S_Cluster_Deployment_Diagram](https://github.com/user-attachments/assets/461c13b2-5733-4e94-9fe5-503efe222433)
 
+![K8S_Architecture](https://github.com/user-attachments/assets/08c70d21-6128-440f-a8b3-6a96f5fd19cb)
+
 ## Installation
 
 ### Requirements
